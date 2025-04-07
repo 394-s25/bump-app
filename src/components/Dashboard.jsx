@@ -19,14 +19,17 @@ const Dashboard = ({ user }) => {
   }, [user.uid]);
 
   return (
-    <div>
-      <h1>Dashboard</h1>
+    <div className="container mx-auto p-4">
+      <h1 className="text-3xl font-bold mb-4">My Groove</h1>
       {playlists.length ? (
         playlists.map((playlist) => (
-          <Playlist key={playlist.id} user={user} playlist={playlist} />
+          <div key={playlist.id} className="mb-2">
+            <h2 className="text-xl">{playlist.name}</h2>
+            <Playlist user={user} playlist={playlist} />
+          </div>
         ))
       ) : (
-        <p>No playlists found.</p>
+        <p className="text-gray-500">No playlists found.</p>
       )}
     </div>
   );
