@@ -1,21 +1,26 @@
 // /src/components/SongItem.jsx
-import React from 'react';
+import React, {useState} from 'react';
 import { downvoteSong, upvoteSong } from '../Firebase/playlist';
 
 const SongItem = ({ user, playlistId, song }) => {
+  const [votes, setVotes] = useState(song.votes || 0);
   const handleUpvote = async () => {
     try {
+      setVotes(votes + 1);
       await upvoteSong(user.uid, playlistId, song.id);
     } catch (error) {
       console.error('Error upvoting song:', error);
+      setVotes(votes - 1); // Revert the vote count if there's an error
     }
   };
 
   const handleDownvote = async () => {
     try {
+      setVotes(votes - 1);
       await downvoteSong(user.uid, playlistId, song.id);
     } catch (error) {
       console.error('Error downvoting song:', error);
+      setVotes(votes + 1); // Revert the vote count if there's an error
     }
   };
 
@@ -35,7 +40,7 @@ const SongItem = ({ user, playlistId, song }) => {
         >
           ▲
         </button>
-        <span className="mx-2 font-semibold">{song.votes}</span>
+        <span className="mx-2 font-semibold">{votes}</span>
         <button
           onClick={handleDownvote}
           className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"

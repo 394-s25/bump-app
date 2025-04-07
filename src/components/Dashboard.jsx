@@ -22,6 +22,11 @@ const Dashboard = ({ user }) => {
       try {
         const data = await getUserPlaylists(user.uid);
         setPlaylists(data);
+        //get songs 
+        const songsData = await getSongsForPlaylist(user.uid, playlistid);
+
+        // sort by votes
+        
       } catch (error) {
         console.error('Error fetching playlists:', error);
       }
