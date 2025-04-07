@@ -1,4 +1,3 @@
-// /src/components/Playlist.jsx
 import React, { useEffect, useState } from 'react';
 import { getSongsForPlaylist } from '../Firebase/playlist';
 import AddSongForm from './AddSongForm';
@@ -13,7 +12,8 @@ const Playlist = ({ user, playlist }) => {
       async function fetchSongs() {
         try {
           const songsData = await getSongsForPlaylist(user.uid, playlist.id);
-          setSongs(songsData);
+          const sortedSongs = [...songsData].sort((a, b) => b.votes - a.votes);
+          setSongs(sortedSongs);
         } catch (error) {
           console.error('Error fetching songs:', error);
         }
