@@ -1,49 +1,57 @@
-// /src/components/SongItem.jsx
-import React, {useState} from 'react';
+// // /src/components/SongItem.jsx
+import React from 'react';
 import { downvoteSong, upvoteSong } from '../Firebase/playlist';
 
-const SongItem = ({ user, playlistId, song }) => {
-  const [votes, setVotes] = useState(song.votes || 0);
+const SongItem = ({ user, playlistId, song, onVote, isCurrent }) => {
+  const placeholderImage = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTZDUqjRko7Ws05tXGYs6VXi40C2R4qo5dQdA&s"
+
   const handleUpvote = async () => {
     try {
-      setVotes(votes + 1);
       await upvoteSong(user.uid, playlistId, song.id);
+      onVote(); // re-fetch songs from dashboard
     } catch (error) {
       console.error('Error upvoting song:', error);
-      setVotes(votes - 1); // Revert the vote count if there's an error
     }
   };
 
   const handleDownvote = async () => {
     try {
-      setVotes(votes - 1);
       await downvoteSong(user.uid, playlistId, song.id);
+      onVote(); // re-fetch songs from dashboard
     } catch (error) {
       console.error('Error downvoting song:', error);
-      setVotes(votes + 1); // Revert the vote count if there's an error
     }
   };
 
   return (
     <div
-      className={'flex items-center justify-between p-4 rounded-md shadow-sm border transition-all'}
+      className={`flex items-center justify-between p-4 rounded-lg shadow-md border ${
+        isCurrent ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200'
+      }`}
     >
-      <img src={song.image} alt={song.title} className="w-16 h-16 rounded object-cover" />
-      <div className="ml-4 flex-grow">
-        <h2 className="text-md font-semibold">{song.title}</h2>
-        <p className="text-xs text-gray-500">User: {song.user}</p>
+      <div className="flex items-center gap-3">
+        <img
+          src = {placeholderImage}
+          alt={song.title}
+          className="w-12 h-12 rounded object-cover"
+        />
+        <div>
+          <p className="font-semibold text-sm">{song.songTitle}</p>
+          <p className="text-gray-500 text-xs">User: {song.artist}</p>
+        </div>
       </div>
-      <div className="flex items-center">
+
+      <div className="flex items-center gap-2">
         <button
           onClick={handleUpvote}
-          className="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600"
+          className="text-green-600 hover:text-green-800 text-xl"
         >
           ▲
         </button>
-        <span className="mx-2 font-semibold">{votes}</span>
+        <span className="font-medium w-5 text-center">{song.votes}</span>
         <button
           onClick={handleDownvote}
-          className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
+          className="text-red-600 hover:text-red-800 text-xl"
         >
           ▼
         </button>
