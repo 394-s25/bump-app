@@ -1,4 +1,3 @@
-// /src/App.jsx
 import React, { useEffect, useState } from 'react';
 import Dashboard from './components/Dashboard';
 import { signInUser } from './Firebase/auth';
