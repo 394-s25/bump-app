@@ -27,7 +27,7 @@ const MusicPlayer = ({ currentSong }) => {
             {isPlaying ? <FaPause /> : <FaPlay />}
           </button>
         </div>
-        <div className="flex items-center gap-2 w-full">
+        <div className="hidden md:flex items-center gap-2 w-full">
           <span className="text-xs text-gray-500">0:00</span>
           <input
             type="range"
@@ -39,7 +39,7 @@ const MusicPlayer = ({ currentSong }) => {
         </div>
       </section>
 
-      <section className="flex items-center gap-3 min-w-[100px]">
+      <section className="hidden md:flex items-center gap-3 min-w-[100px]">
         <FaVolumeUp className="text-black" />
         <input
           type="range"
