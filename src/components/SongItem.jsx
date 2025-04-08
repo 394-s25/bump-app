@@ -4,7 +4,7 @@ import { downvoteSong, upvoteSong } from '../Firebase/playlist';
 
 const SongItem = ({ user, playlistId, song, onVote, isCurrent }) => {
   const placeholderImage = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTZDUqjRko7Ws05tXGYs6VXi40C2R4qo5dQdA&s"
-
+  const placeholderUser = "unknown"
   const handleUpvote = async () => {
     try {
       await upvoteSong(user.uid, playlistId, song.id);
@@ -37,7 +37,7 @@ const SongItem = ({ user, playlistId, song, onVote, isCurrent }) => {
         />
         <div>
           <p className="font-semibold text-sm">{song.songTitle} - {song.artist}</p>
-          <p className="text-gray-500 text-xs">User: </p>
+          <p className="text-gray-500 text-xs">User: {song.user ? song.user : placeholderUser}</p>
         </div>
       </div>
 
