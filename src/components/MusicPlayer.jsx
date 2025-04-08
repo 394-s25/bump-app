@@ -8,7 +8,8 @@ const MusicPlayer = ({ currentSong }) => {
 
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-white text-black px-6 py-4 flex items-center justify-between z-50 border-t">
-      <div className="flex items-center gap-4 min-w-[250px]">
+
+      <section className="flex items-center gap-4 min-w-[250px]">
         <img
           src={currentSong.image}
           alt={currentSong.title}
@@ -18,11 +19,12 @@ const MusicPlayer = ({ currentSong }) => {
           <p className="font-semibold">{currentSong.title}</p>
           <p className="text-sm text-gray-500">{currentSong.user}</p>
         </div>
-      </div>
-      <div className="flex flex-col items-center flex-1 max-w-xl mx-8">
+      </section>
+
+      <section className="flex flex-col items-center flex-1 max-w-xl mx-8">
         <div className="flex items-center gap-4 mb-1">
-          <button className="text-black text-2xl mb-5 mt-5">
-            <FaPlay/>
+          <button onClick={togglePlay} className="text-black text-2xl mb-3 mt-3">
+            {isPlaying ? <FaPause /> : <FaPlay />}
           </button>
         </div>
         <div className="flex items-center gap-2 w-full">
@@ -35,9 +37,9 @@ const MusicPlayer = ({ currentSong }) => {
           />
           <span className="text-xs text-gray-500">2:10</span>
         </div>
-      </div>
+      </section>
 
-      <div className="flex items-center gap-3 min-w-[100px]">
+      <section className="flex items-center gap-3 min-w-[100px]">
         <FaVolumeUp className="text-black" />
         <input
           type="range"
@@ -45,7 +47,7 @@ const MusicPlayer = ({ currentSong }) => {
           max="100"
           className="w-24 accent-black"
         />
-      </div>
+      </section>
     </div>
   );
 };
