@@ -24,12 +24,12 @@ const Dashboard = ({ user }) => {
   }, [fetchSongs]);
 
   return (
-    <div className="container mx-auto p-4">
+    <div className="bg-lightBeige min-h-screen container mx-auto p-4" style={{ backgroundColor: '#FAF9F6' }}>
       <header className="text-center mb-8">
-        <h1 className="text-3xl font-bold">Bump</h1>
+        <h1 className="text-3xl font-bold" >BUMP</h1>
       </header>
-      <header className="mb-4">
-        <h1 className="text-2xl font-bold">My Groove - Road Trip</h1>
+      <header className="mb-4 flex justify-center">
+        <h1 className="text-2xl font-bold rounded-xl px-6 py-3 text-center" style={{ backgroundColor: '#a7b8ff' }}>My Groove - Road Trip</h1>
       </header>
       <div className="space-y-4">
         <FlipMove>
@@ -49,5 +49,7 @@ const Dashboard = ({ user }) => {
     </div>
   );
 };
+
+
 
 export default Dashboard;
