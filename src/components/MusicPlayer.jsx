@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FaPlay, FaPause, FaVolumeUp } from 'react-icons/fa';
+import {CiPlay1, CiPause1, CiVolume, CiVolumeHigh, CiCircleChevRight } from 'react-icons/ci';
 
 const MusicPlayer = ({ currentSong }) => {
   const [isPlaying, setIsPlaying] = useState(true);
@@ -24,7 +24,10 @@ const MusicPlayer = ({ currentSong }) => {
       <section className="flex flex-col items-center flex-1 max-w-xl mx-8">
         <div className="flex items-center gap-4 mb-1">
           <button onClick={togglePlay} className="text-black text-2xl mb-3 mt-3">
-            {isPlaying ? <FaPause /> : <FaPlay />}
+            {isPlaying ? <CiPause1 size={28} /> : <CiPlay1 size={28} />}
+          </button>
+          <button className="text-black text-2xl mb-3 mt-3" >
+            <CiCircleChevRight size={28} />
           </button>
         </div>
         <div className="hidden md:flex items-center gap-2 w-full">
@@ -33,19 +36,19 @@ const MusicPlayer = ({ currentSong }) => {
             type="range"
             min="0"
             max="100"
-            className="w-full accent-black"
+            className="w-full accent-gray"
           />
           <span className="text-xs text-gray-500">2:10</span>
         </div>
       </section>
 
       <section className="hidden md:flex items-center gap-3 min-w-[100px]">
-        <FaVolumeUp className="text-black" />
+        <CiVolumeHigh size={28} className="text-black" />
         <input
           type="range"
           min="0"
           max="100"
-          className="w-24 accent-black"
+          className="w-24 accent-gray"
         />
       </section>
     </div>
