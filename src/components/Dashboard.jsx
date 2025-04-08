@@ -2,6 +2,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { getSongsForPlaylist } from '../Firebase/playlist';
 import SongItem from './SongItem';
+import FlipMove from 'react-flip-move';
 
 const Dashboard = ({ user }) => {
   const playlistId = 'HaZFJWwiSRxf2cgouR9i';
@@ -30,18 +31,20 @@ const Dashboard = ({ user }) => {
       <header className="mb-4">
         <h1 className="text-2xl font-bold">My Groove - Road Trip</h1>
       </header>
-
       <div className="space-y-4">
-        {songs.map((song, index) => (
-          <SongItem
-            key={song.id}
-            user={user}
-            playlistId={playlistId}
-            song={song}
-            isCurrent={index === 0}
-            onVote={fetchSongs} // re-fetch and sort on vote
-          />
-        ))}
+        <FlipMove>
+          {songs.map((song, index) => (
+            <div key={song.id}>
+              <SongItem
+                user={user}
+                playlistId={playlistId}
+                song={song}
+                isCurrent={index === 0}
+                onVote={fetchSongs}
+              />
+            </div>
+          ))}
+        </FlipMove>
       </div>
     </div>
   );
