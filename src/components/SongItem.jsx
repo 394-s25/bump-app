@@ -31,13 +31,13 @@ const SongItem = ({ user, playlistId, song, onVote, isCurrent }) => {
     >
       <div className="flex items-center gap-3">
         <img
-          src = {placeholderImage}
+          src={song.image ? song.image : placeholderImage}
           alt={song.title}
           className="w-12 h-12 rounded object-cover"
         />
         <div>
-          <p className="font-semibold text-sm">{song.songTitle}</p>
-          <p className="text-gray-500 text-xs">User: {song.artist}</p>
+          <p className="font-semibold text-sm">{song.songTitle} - {song.artist}</p>
+          <p className="text-gray-500 text-xs">User: </p>
         </div>
       </div>
 
