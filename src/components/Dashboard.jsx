@@ -1,9 +1,8 @@
-// // /src/components/Dashboard.jsx
-import React, { useEffect, useState, useCallback } from 'react';
-import { getSongsForPlaylist } from '../Firebase/playlist';
-import SongItem from './SongItem';
+import React, { useCallback, useEffect, useState } from 'react';
 import FlipMove from 'react-flip-move';
+import { getSongsForPlaylist } from '../Firebase/playlist';
 import MusicPlayer from './MusicPlayer';
+import SongItem from './SongItem';
 
 const Dashboard = ({ user }) => {
   const playlistId = 'HaZFJWwiSRxf2cgouR9i';
@@ -32,7 +31,7 @@ const Dashboard = ({ user }) => {
       <header className="mb-4">
         <h1 className="text-2xl font-bold">My Groove - Road Trip</h1>
       </header>
-      <div className="space-y-4">
+      <div className="space-y-4 pb-20">
         <FlipMove>
           {songs.map((song, index) => (
             <div key={song.id}>
