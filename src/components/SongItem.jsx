@@ -99,15 +99,15 @@ const SongItem = ({ user, playlistId, song, onVote, isCurrent }) => {
       <div className="flex items-center gap-2 font-bold">
         <button
           onClick={handleUpvote}
-          className={`text-xl ${userVote === 'upvote' ? 'text-green-800' : 'text-green-600'} hover:text-green-800`}
-        >
+          className={`text-xl ${userVote === 'upvote' ? 'text-green-600' : 'text-gray-400'} ${userVote === 'upvote' ? 'hover:text-green-800': 'hover:text-green-600'}`}
+          >
           <CiSquareChevUp size={28}/>
         </button>
         <span className="w-5 text-center">{song.votes}</span>
         <button
           onClick={handleDownvote}
-          className={`text-xl ${userVote === 'downvote' ? 'text-red-800' : 'text-red-600'} hover:text-red-800`}
-        >
+          className={`text-xl ${userVote === 'downvote' ? 'text-red-600' : 'text-gray-400'} ${userVote === 'downvote' ? 'hover:text-red-800': 'hover:text-red-600'}`}
+          >
           <CiSquareChevDown size={28}/>
         </button>
       </div>
