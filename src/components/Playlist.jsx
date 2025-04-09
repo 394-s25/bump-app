@@ -7,17 +7,20 @@ const Playlist = ({ user, playlist }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [songs, setSongs] = useState([]);
 
+  // Define fetchSongs as a callback to retrieve and update songs.
+  const fetchSongs = async () => {
+    try {
+      const songsData = await getSongsForPlaylist(user.uid, playlist.id);
+      const sortedSongs = [...songsData].sort((a, b) => b.votes - a.votes);
+      setSongs(sortedSongs);
+    } catch (error) {
+      console.error('Error fetching songs:', error);
+    }
+  };
+
+  // Trigger fetchSongs when the playlist expands.
   useEffect(() => {
     if (isExpanded) {
-      async function fetchSongs() {
-        try {
-          const songsData = await getSongsForPlaylist(user.uid, playlist.id);
-          const sortedSongs = [...songsData].sort((a, b) => b.votes - a.votes);
-          setSongs(sortedSongs);
-        } catch (error) {
-          console.error('Error fetching songs:', error);
-        }
-      }
       fetchSongs();
     }
   }, [isExpanded, user.uid, playlist.id]);
@@ -31,7 +34,13 @@ const Playlist = ({ user, playlist }) => {
         <div>
           {songs.length ? (
             songs.map((song) => (
-              <SongItem key={song.id} user={user} playlistId={playlist.id} song={song} />
+              <SongItem
+                key={song.id}
+                user={user}
+                playlistId={playlist.id}
+                song={song}
+                onVote={fetchSongs}  // Pass the callback to SongItem
+              />
             ))
           ) : (
             <p>No songs in this playlist yet.</p>
