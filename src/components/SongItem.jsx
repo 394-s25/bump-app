@@ -1,6 +1,7 @@
 // // /src/components/SongItem.jsx
 import React from 'react';
 import { downvoteSong, upvoteSong } from '../Firebase/playlist';
+import {CiSquareChevUp, CiSquareChevDown } from 'react-icons/ci';
 
 const SongItem = ({ user, playlistId, song, onVote, isCurrent }) => {
   const placeholderImage = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTZDUqjRko7Ws05tXGYs6VXi40C2R4qo5dQdA&s"
@@ -41,19 +42,19 @@ const SongItem = ({ user, playlistId, song, onVote, isCurrent }) => {
         </div>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 font-bold">
         <button
           onClick={handleUpvote}
           className="text-green-600 hover:text-green-800 text-xl"
         >
-          ▲
+          <CiSquareChevUp size={28}/>
         </button>
-        <span className="font-medium w-5 text-center">{song.votes}</span>
+        <span className="w-5 text-center">{song.votes}</span>
         <button
           onClick={handleDownvote}
           className="text-red-600 hover:text-red-800 text-xl"
         >
-          ▼
+          <CiSquareChevDown size={28}/>
         </button>
       </div>
     </div>

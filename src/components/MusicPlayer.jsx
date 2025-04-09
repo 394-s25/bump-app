@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import {CiPlay1, CiPause1, CiVolume, CiVolumeHigh, CiCircleChevRight } from 'react-icons/ci';
+import {CiPlay1, CiPause1, CiVolumeHigh, CiCircleChevRight } from 'react-icons/ci';
 
-const MusicPlayer = ({ currentSong }) => {
+const MusicPlayer = ({song}) => {
   const [isPlaying, setIsPlaying] = useState(true);
 
   const togglePlay = () => setIsPlaying(!isPlaying);
@@ -11,13 +11,13 @@ const MusicPlayer = ({ currentSong }) => {
 
       <section className="flex items-center gap-4 min-w-[250px]">
         <img
-          src={currentSong.image}
-          alt={currentSong.title}
+          src={song.image}
+          alt={song.songTitle}
           className="w-12 h-12 rounded-full object-cover"
         />
         <div>
-          <p className="font-semibold">{currentSong.title}</p>
-          <p className="text-sm text-gray-500">{currentSong.user}</p>
+          <p className="font-semibold">{song.songTitle} - {song.artist}</p>
+          <p className="text-sm text-gray-500">Added by: {song.user}</p>
         </div>
       </section>
 
