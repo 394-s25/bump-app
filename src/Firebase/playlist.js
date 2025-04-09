@@ -1,10 +1,9 @@
-// /src/Firebase/playlist.js
 import { addDoc, collection, doc, getDocs, increment, serverTimestamp, updateDoc } from 'firebase/firestore';
 import { db } from './firebaseConfig.js';
 
 /**
  * Fetch playlists for a given user.
- * Assumes playlists are stored under "users/{userId}/playlists".
+ * Assumes playlists are stored under "users/{userId}/playlist".
  */
 export async function getUserPlaylists(userId) {
   const playlists = [];
@@ -17,7 +16,7 @@ export async function getUserPlaylists(userId) {
 
 /**
  * Fetch songs for a specific playlist.
- * Assumes songs are stored under "users/{userId}/playlists/{playlistId}/songs".
+ * Assumes songs are stored under "users/{userId}/playlist/{playlistId}/songs".
  */
 export async function getSongsForPlaylist(userId, playlistId) {
   const songs = [];
@@ -74,6 +73,31 @@ export async function downvoteSong(userId, playlistId, songDocId) {
     console.log("Song downvoted.");
   } catch (error) {
     console.error("Error downvoting song:", error);
+    throw error;
+  }
+}
+
+/**
+ * Cancels a vote for a song.
+ * If the user cancels an upvote, it will decrement the votes by 1;
+ * if the user cancels a downvote, it will increment the votes by 1.
+ *
+ * @param {string} userId - The user ID.
+ * @param {string} playlistId - The playlist ID.
+ * @param {string} songDocId - The song document ID.
+ * @param {string} voteType - Either 'upvote' or 'downvote'.
+ */
+export async function cancelVoteSong(userId, playlistId, songDocId, voteType) {
+  try {
+    const songRef = doc(db, "users", userId, "playlist", playlistId, "songs", songDocId);
+    // Determine the adjustment based on the vote type being canceled.
+    const adjustment = voteType === 'upvote' ? -1 : (voteType === 'downvote' ? 1 : 0);
+    if (adjustment !== 0) {
+      await updateDoc(songRef, { votes: increment(adjustment) });
+      console.log("Vote cancelled.");
+    }
+  } catch (error) {
+    console.error("Error cancelling vote:", error);
     throw error;
   }
 }
