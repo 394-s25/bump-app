@@ -48,12 +48,7 @@ const Dashboard = ({ user }) => {
         </FlipMove>
       </div>
       <MusicPlayer
-        currentSong={{
-          title: 'Willow – Taylor Swift',
-          user: 'Ray',
-          image: 'https://i.imgur.com/1ZQZ1Z2.jpg',
-        }}
-        isPlaying={true}
+        song={songs.length > 0 ? songs[0] : { image: '', songTitle: '', artist: '', user: '' }} // Placeholder if no songs
     />
     </div>
   );

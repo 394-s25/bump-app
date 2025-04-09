@@ -1,4 +1,7 @@
+
+// // /src/components/SongItem.jsx
 import React, { useEffect, useState } from 'react';
+import {CiSquareChevUp, CiSquareChevDown } from 'react-icons/ci';
 import { cancelVoteSong, downvoteSong, upvoteSong } from '../Firebase/playlist';
 
 const SongItem = ({ user, playlistId, song, onVote, isCurrent }) => {
@@ -93,19 +96,19 @@ const SongItem = ({ user, playlistId, song, onVote, isCurrent }) => {
         </div>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 font-bold">
         <button
           onClick={handleUpvote}
           className={`text-xl ${userVote === 'upvote' ? 'text-green-800' : 'text-green-600'} hover:text-green-800`}
         >
-          ▲
+          <CiSquareChevUp size={28}/>
         </button>
-        <span className="font-medium w-5 text-center">{song.votes}</span>
+        <span className="w-5 text-center">{song.votes}</span>
         <button
           onClick={handleDownvote}
           className={`text-xl ${userVote === 'downvote' ? 'text-red-800' : 'text-red-600'} hover:text-red-800`}
         >
-          ▼
+          <CiSquareChevDown size={28}/>
         </button>
       </div>
     </div>
