@@ -3,6 +3,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { getSongsForPlaylist } from '../Firebase/playlist';
 import SongItem from './SongItem';
 import FlipMove from 'react-flip-move';
+import MusicPlayer from './MusicPlayer';
 
 const Dashboard = ({ user }) => {
   const playlistId = 'HaZFJWwiSRxf2cgouR9i';
@@ -46,6 +47,14 @@ const Dashboard = ({ user }) => {
           ))}
         </FlipMove>
       </div>
+      <MusicPlayer
+        currentSong={{
+          title: 'Willow – Taylor Swift',
+          user: 'Ray',
+          image: 'https://i.imgur.com/1ZQZ1Z2.jpg',
+        }}
+        isPlaying={true}
+    />
     </div>
   );
 };
