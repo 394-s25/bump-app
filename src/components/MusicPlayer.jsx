@@ -7,9 +7,9 @@ const MusicPlayer = ({song}) => {
   const togglePlay = () => setIsPlaying(!isPlaying);
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white text-black px-6 py-4 flex items-center justify-between z-50 border-t">
+    <div className="fixed bottom-0 left-0 right-0 bg-white text-black px-6 py-4 flex items-center justify-between z-50 border-t shadow-md" style={{ backgroundColor: '#a7b8ff' }}>
 
-      <section className="flex items-center gap-4 min-w-[250px]">
+      <section className="flex items-center gap-4 min-w-[250px]" >
         <img
           src={song.image}
           alt={song.songTitle}
@@ -21,7 +21,7 @@ const MusicPlayer = ({song}) => {
         </div>
       </section>
 
-      <section className="flex flex-col items-center flex-1 max-w-xl mx-8">
+      <section className="flex flex-col items-center flex-1 max-w-xl mx-8" >
         <div className="flex items-center gap-4 mb-1">
           <button onClick={togglePlay} className="text-black text-2xl mb-3 mt-3">
             {isPlaying ? <CiPause1 size={28} /> : <CiPlay1 size={28} />}
