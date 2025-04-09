@@ -31,14 +31,14 @@ const MusicPlayer = ({song}) => {
           </button>
         </div>
         <div className="hidden md:flex items-center gap-2 w-full">
-          <span className="text-xs text-gray-500">0:00</span>
+          <span className="text-xs text-black">0:00</span>
           <input
             type="range"
             min="0"
             max="100"
-            className="w-full accent-gray"
+            className="w-full accent-yellow-50"
           />
-          <span className="text-xs text-gray-500">2:10</span>
+          <span className="text-xs text-black">2:10</span>
         </div>
       </section>
 
@@ -48,7 +48,8 @@ const MusicPlayer = ({song}) => {
           type="range"
           min="0"
           max="100"
-          className="w-24 accent-gray"
+          className="w-24 accent-yellow-50"
+          style = {{ background: '#fff' }}
         />
       </section>
     </div>

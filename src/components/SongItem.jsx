@@ -76,7 +76,8 @@ const SongItem = ({ user, playlistId, song, onVote, isCurrent }) => {
 
   return (
     <div
-      className={`flex items-center justify-between p-4 rounded-lg shadow-md border ${
+      style={{ backgroundColor: '#fdf9e9' }}
+      className={`flex items-center justify-between p-4 rounded-lg shadow-md border bg-white ${
         isCurrent ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200'
       }`}
     >
