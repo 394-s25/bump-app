@@ -1,4 +1,11 @@
-import { addDoc, collection, doc, getDocs, increment, serverTimestamp, updateDoc } from 'firebase/firestore';
+import {
+  addDoc,
+  collection,
+  doc,
+  getDocs,
+  runTransaction,
+  serverTimestamp
+} from 'firebase/firestore';
 import { db } from './firebaseConfig.js';
 
 /**
@@ -29,6 +36,7 @@ export async function getSongsForPlaylist(userId, playlistId) {
 
 /**
  * Uploads a new song to a specific playlist.
+ * Since addDoc creates a new document in an atomic manner, a transaction is not required here.
  */
 export async function uploadSong(userId, playlistId, songTitle, artist) {
   try {
@@ -50,29 +58,43 @@ export async function uploadSong(userId, playlistId, songTitle, artist) {
 }
 
 /**
- * Increments the vote count for a song by 1.
+ * Increments the vote count for a song by 1 using a transaction.
  */
 export async function upvoteSong(userId, playlistId, songDocId) {
+  const songRef = doc(db, "users", userId, "playlist", playlistId, "songs", songDocId);
   try {
-    const songRef = doc(db, "users", userId, "playlist", playlistId, "songs", songDocId);
-    await updateDoc(songRef, { votes: increment(1) });
-    console.log("Song upvoted.");
+    await runTransaction(db, async (transaction) => {
+      const songDoc = await transaction.get(songRef);
+      if (!songDoc.exists()) {
+        throw new Error("Song does not exist!");
+      }
+      const currentVotes = songDoc.data().votes || 0;
+      transaction.update(songRef, { votes: currentVotes + 1 });
+    });
+    console.log("Song upvoted using transaction.");
   } catch (error) {
-    console.error("Error upvoting song:", error);
+    console.error("Error upvoting song with transaction:", error);
     throw error;
   }
 }
 
 /**
- * Decrements the vote count for a song by 1.
+ * Decrements the vote count for a song by 1 using a transaction.
  */
 export async function downvoteSong(userId, playlistId, songDocId) {
+  const songRef = doc(db, "users", userId, "playlist", playlistId, "songs", songDocId);
   try {
-    const songRef = doc(db, "users", userId, "playlist", playlistId, "songs", songDocId);
-    await updateDoc(songRef, { votes: increment(-1) });
-    console.log("Song downvoted.");
+    await runTransaction(db, async (transaction) => {
+      const songDoc = await transaction.get(songRef);
+      if (!songDoc.exists()) {
+        throw new Error("Song does not exist!");
+      }
+      const currentVotes = songDoc.data().votes || 0;
+      transaction.update(songRef, { votes: currentVotes - 1 });
+    });
+    console.log("Song downvoted using transaction.");
   } catch (error) {
-    console.error("Error downvoting song:", error);
+    console.error("Error downvoting song with transaction:", error);
     throw error;
   }
 }
@@ -81,6 +103,8 @@ export async function downvoteSong(userId, playlistId, songDocId) {
  * Cancels a vote for a song.
  * If the user cancels an upvote, it will decrement the votes by 1;
  * if the user cancels a downvote, it will increment the votes by 1.
+ * You could also refactor this to use a transaction if you need to ensure consistency
+ * in a more complex flow.
  *
  * @param {string} userId - The user ID.
  * @param {string} playlistId - The playlist ID.
@@ -88,16 +112,24 @@ export async function downvoteSong(userId, playlistId, songDocId) {
  * @param {string} voteType - Either 'upvote' or 'downvote'.
  */
 export async function cancelVoteSong(userId, playlistId, songDocId, voteType) {
+  // For simplicity, this function still uses the atomic update with increment.
+  // It can be refactored to use a transaction if you need additional reads.
   try {
     const songRef = doc(db, "users", userId, "playlist", playlistId, "songs", songDocId);
-    // Determine the adjustment based on the vote type being canceled.
     const adjustment = voteType === 'upvote' ? -1 : (voteType === 'downvote' ? 1 : 0);
     if (adjustment !== 0) {
-      await updateDoc(songRef, { votes: increment(adjustment) });
-      console.log("Vote cancelled.");
+      await runTransaction(db, async (transaction) => {
+        const songDoc = await transaction.get(songRef);
+        if (!songDoc.exists()) {
+          throw new Error("Song does not exist!");
+        }
+        const currentVotes = songDoc.data().votes || 0;
+        transaction.update(songRef, { votes: currentVotes + adjustment });
+      });
+      console.log("Vote cancelled using transaction.");
     }
   } catch (error) {
-    console.error("Error cancelling vote:", error);
+    console.error("Error cancelling vote with transaction:", error);
     throw error;
   }
 }
