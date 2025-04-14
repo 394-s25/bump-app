@@ -1,12 +1,14 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import FlipMove from 'react-flip-move';
 import { getSongsForPlaylist } from '../Firebase/playlist';
+import AddSongForm from './AddSongForm';
 import MusicPlayer from './MusicPlayer';
 import SongItem from './SongItem';
 
 const Dashboard = ({ user }) => {
   const playlistId = 'HaZFJWwiSRxf2cgouR9i';
   const [songs, setSongs] = useState([]);
+  const [showAddSongForm, setShowAddSongForm] = useState(false);
 
   // Fetch and sort songs
   const fetchSongs = useCallback(async () => {
@@ -31,10 +33,19 @@ const Dashboard = ({ user }) => {
       <header className="mb-4 flex justify-center">
         <h1 className="text-2xl font-bold rounded-xl px-6 py-3 text-center shadow-lg backdrop-blur-md bg-white/30 border border-white/20 text-indigo-500" style={{ backgroundColor: '#a7b8ff' }}>My Groove - Road Trip</h1>
       </header>
+      <div className="flex justify-center mb-4">
+        <button
+          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          onClick={() => setShowAddSongForm(true)}
+        >
+          Add a Song Here!
+        </button>
+      </div>
+      
       <div className="space-y-4 pb-20">
         <FlipMove>
           {songs.map((song, index) => (
-            <div key={song.id} className = 'mb-4 mt-4'>
+            <div key={song.id} className='mb-4 mt-4'>
               <SongItem
                 user={user}
                 playlistId={playlistId}
@@ -48,11 +59,15 @@ const Dashboard = ({ user }) => {
       </div>
       <MusicPlayer
         song={songs.length > 0 ? songs[0] : { image: '', songTitle: '', artist: '', user: '' }} // Placeholder if no songs
-    />
+      />
+      {showAddSongForm && (
+        <AddSongForm
+          onClose={() => setShowAddSongForm(false)}
+          onAddSong={() => { fetchSongs(); setShowAddSongForm(false); }}
+        />
+      )}
     </div>
   );
 };
-
-
 
 export default Dashboard;
