@@ -1,5 +1,6 @@
 // /src/components/AddSongForm.jsx
 import React, { useState } from 'react';
+import SongSearchItem from './SongSearchItem';
 
 // This component now serves as a modal pop-up for adding a song. It includes a search bar that will eventually connect to the Spotify API
 // and displays a dummy search result. The Cancel button closes the pop-up and the Add button submits the selected song info.
@@ -57,16 +58,7 @@ const AddSongForm = ({ onClose, onAddSong }) => {
         </div>
         {songInfo && (
           <div style={{ marginBottom: '15px' }}>
-            <p><strong>Song Title:</strong> {songInfo.title}</p>
-            <p><strong>Artist:</strong> {songInfo.artist}</p>
-            <p><strong>Album:</strong> {songInfo.album}</p>
-            {songInfo.image && (
-              <img
-                src={songInfo.image}
-                alt={songInfo.title}
-                style={{ width: '100px', height: '100px', objectFit: 'cover' }}
-              />
-            )}
+            <SongSearchItem/>
           </div>
         )}
         <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
