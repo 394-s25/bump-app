@@ -18,7 +18,7 @@ const AddSongForm = ({ onClose, onAddSong }) => {
       return;
     }
     try {
-      const response = await fetch(`http://127.0.0.1:5000/search?q=${encodeURIComponent(query)}&limit=10`);
+      const response = await fetch(`https://flask-api-416502417253.us-central1.run.app/search?q=hi&limit=10`);
       if (!response.ok) {
         throw new Error('Failed to fetch search results');
       }
