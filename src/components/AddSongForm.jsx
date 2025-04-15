@@ -1,34 +1,59 @@
-// /src/components/AddSongForm.jsx
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import SongSearchItem from './SongSearchItem';
 
-// This component now serves as a modal pop-up for adding a song. It includes a search bar that will eventually connect to the Spotify API
-// and displays a dummy search result. The Cancel button closes the pop-up and the Add button submits the selected song info.
+// This component now serves as a modal pop-up for adding a song. It connects to the Spotify API search endpoint (/api/search) 
+// and displays live search results as the user types. Once a song is clicked, that result is selected, and the search block is replaced
+// with the selected song information.
 const AddSongForm = ({ onClose, onAddSong }) => {
   const [query, setQuery] = useState('');
-  const [songInfo, setSongInfo] = useState(null);
-  
-  // Stub function that simulates searching songs via an API (e.g., Spotify API). 
-  // Later, you can replace this with a real API call.
+  const [searchResults, setSearchResults] = useState([]);
+  const [selectedSong, setSelectedSong] = useState(null);
+
+  // Function that calls the backend API to fetch tracks from Spotify
   const handleSearch = async () => {
-    console.log('Searching for:', query);
-    // Simulate an API response
-    setSongInfo({
-      title: query,
-      artist: 'Sample Artist',
-      album: 'Sample Album',
-      image: 'https://via.placeholder.com/100'
-    });
+    if (!query.trim()) {
+      setSearchResults([]);
+      return;
+    }
+    try {
+      const response = await fetch(`http://127.0.0.1:5000/search?q=${encodeURIComponent(query)}&limit=10`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch search results');
+      }
+      const data = await response.json();
+      // Use the 'results' key from your Flask response
+      if (data.results) {
+        setSearchResults(data.results);
+      } else {
+        setSearchResults([]);
+      }
+    } catch (error) {
+      console.error('Error during search:', error);
+    }
   };
 
-  // Handle adding the song; you can later integrate with your Firebase backend.
-  const handleAdd = async () => {
-    if (!songInfo) {
+  // Debounced search: trigger search 300ms after the user stops typing
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      handleSearch();
+    }, 300);
+    return () => clearTimeout(delayDebounceFn);
+  }, [query]);
+
+  // Handle when a user selects a song from search results
+  const handleSongSelect = (track) => {
+    setSelectedSong(track);
+    setSearchResults([]);
+    setQuery('');
+  };
+
+  // Handle adding the song; you can later integrate with your Firebase backend
+  const handleAdd = () => {
+    if (!selectedSong) {
       alert('Please search and select a song before adding.');
       return;
     }
-    // Call the provided onAddSong function with song info if needed, then close the modal
-    onAddSong(songInfo);
+    onAddSong(selectedSong);
     onClose();
   };
 
@@ -43,22 +68,29 @@ const AddSongForm = ({ onClose, onAddSong }) => {
         width: '400px', maxWidth: '90%'
       }}>
         <h2>Add a Song</h2>
-        <div style={{ marginBottom: '15px', display: 'flex', alignItems: 'center' }}>
-          <input
-            type="text"
-            placeholder="search song names here"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            style={{ flexGrow: 1, padding: '8px' }}
-            required
-          />
-          <button onClick={handleSearch} style={{ marginLeft: '8px', padding: '8px 12px' }}>
-            Search
-          </button>
-        </div>
-        {songInfo && (
+        {!selectedSong ? (
           <div style={{ marginBottom: '15px' }}>
-            <SongSearchItem/>
+            <input
+              type="text"
+              placeholder="Search for songs..."
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              style={{ width: '100%', padding: '8px' }}
+            />
+            {searchResults.length > 0 && (
+              <div style={{ marginTop: '10px', maxHeight: '200px', overflowY: 'auto' }}>
+                {searchResults.map((track, index) => (
+                  <div key={track.spotify_url || index} onClick={() => handleSongSelect(track)} style={{ cursor: 'pointer' }}>
+                    <SongSearchItem track={track} />
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        ) : (
+          <div style={{ marginBottom: '15px' }}>
+            <p>Selected Song:</p>
+            <SongSearchItem track={selectedSong} />
           </div>
         )}
         <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
