@@ -38,15 +38,17 @@ export async function getSongsForPlaylist(userId, playlistId) {
  * Uploads a new song to a specific playlist.
  * Since addDoc creates a new document in an atomic manner, a transaction is not required here.
  */
-export async function uploadSong(userId, playlistId, songTitle, artist) {
+export async function uploadSong(userId, playlistId, artist, image, songTitle, user = "default") {
   try {
     const docRef = await addDoc(
       collection(db, "users", userId, "playlist", playlistId, "songs"),
       {
-        songTitle,
         artist,
-        votes: 0,
-        timestamp: serverTimestamp()
+        image,
+        songTitle,
+        timestamp: serverTimestamp(),
+        user,
+        votes: 0
       }
     );
     console.log("Song added with ID:", docRef.id);

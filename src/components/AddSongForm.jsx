@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import SongSearchItem from './SongSearchItem';
+import { uploadSong } from '../Firebase/playlist';
+
 
 // This component now serves as a modal pop-up for adding a song. It connects to the Spotify API search endpoint (/api/search) 
 // and displays live search results as the user types. Once a song is clicked, that result is selected, and the search block is replaced
@@ -48,13 +50,23 @@ const AddSongForm = ({ onClose, onAddSong }) => {
   };
 
   // Handle adding the song; you can later integrate with your Firebase backend
-  const handleAdd = () => {
+  const handleAdd = async () => {
     if (!selectedSong) {
       alert('Please search and select a song before adding.');
       return;
     }
-    onAddSong(selectedSong);
-    onClose();
+    try {
+      onAddSong();
+      const userid = "MjZtStjNEGXASiKSgvHwyIiWEry1";
+      const playlistid = "HaZFJWwiSRxf2cgouR9i";
+
+      await uploadSong(userid, playlistid, selectedSong.artist, selectedSong.cover, selectedSong.name);
+      console.log(selectedSong);
+
+    } catch(error) {
+      console.error("Error adding song to Firebase:", error);
+
+    }
   };
 
   return (
