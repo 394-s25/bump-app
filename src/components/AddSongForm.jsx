@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import SongSearchItem from './SongSearchItem';
 import { uploadSong } from '../Firebase/playlist';
+import SongSearchItem from './SongSearchItem';
 
 
 // This component now serves as a modal pop-up for adding a song. It connects to the Spotify API search endpoint (/api/search) 
@@ -18,7 +18,7 @@ const AddSongForm = ({ onClose, onAddSong }) => {
       return;
     }
     try {
-      const response = await fetch(`https://flask-api-416502417253.us-central1.run.app/search?q=hi&limit=10`);
+      const response = await fetch(`https://flask-api-416502417253.us-central1.run.app/search?q=${encodeURIComponent(query)}&limit=10`);
       if (!response.ok) {
         throw new Error('Failed to fetch search results');
       }
