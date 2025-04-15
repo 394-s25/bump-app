@@ -1,4 +1,6 @@
-// src/components/SignUpOrIn.jsx
+// references: https://www.youtube.com/watch?v=8QgQKRcAUvM&ab_channel=GreatStack
+// references: https://www.youtube.com/watch?v=qgRoBaqhdZc&ab_channel=KrisFoster
+
 import React, { useState } from 'react';
 import { signUpUser, signInUser } from '../Firebase/auth';
 
@@ -28,48 +30,68 @@ const SignUpOrIn = ({ onAuthSuccess }) => {
   };
 
   const toggleMode = () => {
-    setIsSignUp((prevState) => !prevState);
+    setIsSignUp((prev) => !prev);
     setError(null);
   };
 
   return (
-    <div className="auth-container" style={{ maxWidth: '400px', margin: '0 auto', padding: '20px' }}>
-      <h2>{isSignUp ? 'Sign Up' : 'Sign In'}</h2>
-      <form onSubmit={handleSubmit}>
-        <div style={{ marginBottom: '10px' }}>
-          <label htmlFor="email" style={{ display: 'block', marginBottom: '5px' }}>Email:</label>
-          <input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            style={{ width: '100%', padding: '8px' }}
-          />
-        </div>
-        <div style={{ marginBottom: '10px' }}>
-          <label htmlFor="password" style={{ display: 'block', marginBottom: '5px' }}>Password:</label>
-          <input
-            id="password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            style={{ width: '100%', padding: '8px' }}
-          />
-        </div>
-        <button type="submit" style={{ padding: '10px 20px', marginRight: '10px' }}>
-          {isSignUp ? 'Sign Up' : 'Sign In'}
-        </button>
-      </form>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      <div style={{ marginTop: '15px' }}>
-        <p>
+    <div
+      className="min-h-screen flex flex-col items-center justify-center px-4"
+      style={{ backgroundColor: '#fff7d5' }}
+    >
+      <h1
+        className="text-6xl font-extrabold mb-4 drop-shadow-xl" 
+        style={{ color: '#a7b8ff', textShadow: '2px 2px 0px rgba(0, 0, 0, 0.25)',}}
+      >
+        BUMP
+      </h1>
+      <div className="w-full max-w-md bg-white p-6 rounded-xl shadow-xl border border-indigo-100">
+        <h2 className="text-2xl font-bold text-center text-indigo-600 mb-4">
+          {isSignUp ? 'Create Your Account' : 'Welcome Back'}
+        </h2>
+
+        <form onSubmit={handleSubmit}>
+          <div className="mb-4">
+            <label className="block mb-1 font-medium text-sm">Email</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full p-2 rounded border border-gray-300"
+              required
+            />
+          </div>
+
+          <div className="mb-4">
+            <label className="block mb-1 font-medium text-sm">Password</label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full p-2 rounded border border-gray-300"
+              required
+            />
+          </div>
+
+          {error && <p className="text-red-600 text-sm mb-3">{error}</p>}
+
+          <button
+            type="submit"
+            className="w-full bg-indigo-500 hover:bg-indigo-600 text-white py-2 rounded font-semibold"
+          >
+            {isSignUp ? 'Sign Up' : 'Sign In'}
+          </button>
+        </form>
+
+        <div className="text-center mt-4 text-sm">
           {isSignUp ? 'Already have an account?' : "Don't have an account?"}
-          <button onClick={toggleMode} style={{ marginLeft: '5px' }}>
+          <button
+            onClick={toggleMode}
+            className="ml-2 text-indigo-600 font-semibold hover:underline"
+          >
             {isSignUp ? 'Sign In' : 'Sign Up'}
           </button>
-        </p>
+        </div>
       </div>
     </div>
   );
