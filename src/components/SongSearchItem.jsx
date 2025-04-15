@@ -2,7 +2,6 @@
 import React from 'react';
 
 const SongSearchItem = ({ track }) => {
-  // Extract the necessary details directly from the simplified track object
   const songTitle = track.name;
   const albumName = track.album || 'Unknown Album';
   const artistName = track.artist || 'Unknown Artist';
