@@ -68,6 +68,17 @@ export async function getPublicPlaylists() {
   });
   return playlists;
 }
+
+export async function getSharedPlaylists(userId) {
+  const playlists = [];
+  const q = query(collection(db, "playlists"), where("sharedWith", "array-contains", userId));
+  const querySnapshot = await getDocs(q);
+  querySnapshot.forEach(docSnap => {
+    playlists.push({ id: docSnap.id, ...docSnap.data() });
+  });
+  return playlists;
+}
+
 /**
  * Fetch songs for a specific playlist.
  * Now assumes songs are stored under "playlists/{playlistId}/songs".
