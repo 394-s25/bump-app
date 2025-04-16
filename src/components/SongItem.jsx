@@ -1,14 +1,13 @@
-
-// // /src/components/SongItem.jsx
+// /src/components/SongItem.jsx
 import React, { useEffect, useState } from 'react';
-import {CiSquareChevUp, CiSquareChevDown } from 'react-icons/ci';
+import { CiSquareChevDown, CiSquareChevUp } from 'react-icons/ci';
 import { cancelVoteSong, downvoteSong, upvoteSong } from '../Firebase/playlist';
 
 const SongItem = ({ user, playlistId, song, onVote, isCurrent }) => {
   const voteInfo = `uservote_${song.id}`;
-  
+
   // State to track the user's vote
-  const [userVote, setUserVote] = useState(null); 
+  const [userVote, setUserVote] = useState(null);
 
   // Placeholder data
   const placeholderImage = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTZDUqjRko7Ws05tXGYs6VXi40C2R4qo5dQdA&s";
@@ -26,19 +25,19 @@ const SongItem = ({ user, playlistId, song, onVote, isCurrent }) => {
     try {
       if (userVote === 'upvote') {
         // Cancel the upvote if already upvoted.
-        await cancelVoteSong(user.uid, playlistId, song.id, 'upvote');
+        await cancelVoteSong(playlistId, song.id, 'upvote');
         localStorage.removeItem(voteInfo);
         setUserVote(null);
         onVote(); // Re-fetch or update songs.
       } else {
         // If the user had downvoted, remove that vote first.
         if (userVote === 'downvote') {
-          await cancelVoteSong(user.uid, playlistId, song.id, 'downvote');
+          await cancelVoteSong(playlistId, song.id, 'downvote');
           localStorage.removeItem(voteInfo);
           setUserVote(null);
         }
         // Proceed with upvote.
-        await upvoteSong(user.uid, playlistId, song.id);
+        await upvoteSong(playlistId, song.id);
         localStorage.setItem(voteInfo, 'upvote');
         setUserVote('upvote');
         onVote();
@@ -52,19 +51,19 @@ const SongItem = ({ user, playlistId, song, onVote, isCurrent }) => {
     try {
       if (userVote === 'downvote') {
         // Cancel the downvote if already downvoted.
-        await cancelVoteSong(user.uid, playlistId, song.id, 'downvote');
+        await cancelVoteSong(playlistId, song.id, 'downvote');
         localStorage.removeItem(voteInfo);
         setUserVote(null);
         onVote();
       } else {
         // If the user had upvoted, remove that vote first.
         if (userVote === 'upvote') {
-          await cancelVoteSong(user.uid, playlistId, song.id, 'upvote');
+          await cancelVoteSong(playlistId, song.id, 'upvote');
           localStorage.removeItem(voteInfo);
           setUserVote(null);
         }
         // Proceed with downvote.
-        await downvoteSong(user.uid, playlistId, song.id);
+        await downvoteSong(playlistId, song.id);
         localStorage.setItem(voteInfo, 'downvote');
         setUserVote('downvote');
         onVote();
@@ -84,7 +83,7 @@ const SongItem = ({ user, playlistId, song, onVote, isCurrent }) => {
       <div className="flex items-center gap-3">
         <img
           src={song.image ? song.image : placeholderImage}
-          alt={song.title}
+          alt={song.songTitle}
           className="w-12 h-12 rounded object-cover"
         />
         <div>
@@ -100,16 +99,16 @@ const SongItem = ({ user, playlistId, song, onVote, isCurrent }) => {
       <div className="flex items-center gap-2 font-bold">
         <button
           onClick={handleUpvote}
-          className={`text-xl ${userVote === 'upvote' ? 'text-green-600' : 'text-gray-400'} ${userVote === 'upvote' ? 'hover:text-green-800': 'hover:text-green-600'}`}
-          >
-          <CiSquareChevUp size={28}/>
+          className={`text-xl ${userVote === 'upvote' ? 'text-green-600' : 'text-gray-400'} ${userVote === 'upvote' ? 'hover:text-green-800' : 'hover:text-green-600'}`}
+        >
+          <CiSquareChevUp size={28} />
         </button>
         <span className="w-5 text-center">{song.votes}</span>
         <button
           onClick={handleDownvote}
-          className={`text-xl ${userVote === 'downvote' ? 'text-red-600' : 'text-gray-400'} ${userVote === 'downvote' ? 'hover:text-red-800': 'hover:text-red-600'}`}
-          >
-          <CiSquareChevDown size={28}/>
+          className={`text-xl ${userVote === 'downvote' ? 'text-red-600' : 'text-gray-400'} ${userVote === 'downvote' ? 'hover:text-red-800' : 'hover:text-red-600'}`}
+        >
+          <CiSquareChevDown size={28} />
         </button>
       </div>
     </div>

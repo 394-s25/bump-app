@@ -1,35 +1,50 @@
 // src/components/Dashboard.jsx
 import React, { useCallback, useEffect, useState } from 'react';
 import FlipMove from 'react-flip-move';
-import { getSongsForPlaylist } from '../Firebase/playlist';
+import { getPublicPlaylists, getSongsForPlaylist } from '../Firebase/playlist';
 import AddSongForm from './AddSongForm';
 import MusicPlayer from './MusicPlayer';
 import SongItem from './SongItem';
 
 const Dashboard = ({ user }) => {
-  const playlistId = 'HaZFJWwiSRxf2cgouR9i';
+  const [publicPlaylist, setPublicPlaylist] = useState(null);
   const [songs, setSongs] = useState([]);
   const [showAddSongForm, setShowAddSongForm] = useState(false);
 
-  const fetchSongs = useCallback(async () => {
+  // Fetch songs for a given playlist using its ID.
+  const fetchSongs = useCallback(async (playlistId) => {
     try {
-      const songsData = await getSongsForPlaylist(user.uid, playlistId);
+      const songsData = await getSongsForPlaylist(playlistId);
       const sortedSongs = songsData.sort((a, b) => b.votes - a.votes);
       setSongs(sortedSongs);
     } catch (error) {
       console.error('Error fetching songs:', error);
     }
-  }, [user.uid, playlistId]);
+  }, []);
 
-  useEffect(() => {
-    fetchSongs();
+  // Fetch all public playlists and pick one (here, the first one).
+  const fetchPublicPlaylist = useCallback(async () => {
+    try {
+      const publicPlaylists = await getPublicPlaylists();
+      if (publicPlaylists.length > 0) {
+        const defaultPublicPlaylist = publicPlaylists[0];
+        setPublicPlaylist(defaultPublicPlaylist);
+        // Load songs from the selected public playlist.
+        fetchSongs(defaultPublicPlaylist.id);
+      } else {
+        console.log('No public playlists found');
+      }
+    } catch (error) {
+      console.error('Error fetching public playlists:', error);
+    }
   }, [fetchSongs]);
 
+  useEffect(() => {
+    fetchPublicPlaylist();
+  }, [fetchPublicPlaylist]);
+
   return (
-    <div
-      className="bg-lightBeige min-h-screen p-4"
-      style={{ backgroundColor: '#fff7d5' }}
-    >
+    <div className="bg-lightBeige min-h-screen p-4" style={{ backgroundColor: '#fff7d5' }}>
       <header className="text-center mb-8">
         <h1
           className="text-6xl font-extrabold text-center drop-shadow-xl"
@@ -41,14 +56,16 @@ const Dashboard = ({ user }) => {
           BUMP
         </h1>
       </header>
+
       <header className="mb-4 flex justify-center">
         <h1
           className="text-2xl font-bold rounded-xl px-6 py-3 text-center shadow-lg backdrop-blur-md bg-white/30 border border-white/20 text-indigo-500"
           style={{ backgroundColor: '#a7b8ff' }}
         >
-          My Groove - Road Trip
+          {publicPlaylist ? publicPlaylist.name : 'Public Grooves'}
         </h1>
       </header>
+
       <div className="flex justify-center mb-4">
         <button
           className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
@@ -64,15 +81,16 @@ const Dashboard = ({ user }) => {
             <div key={song.id} className="mb-4 mt-4">
               <SongItem
                 user={user}
-                playlistId={playlistId}
+                playlistId={publicPlaylist ? publicPlaylist.id : ''}
                 song={song}
                 isCurrent={index === 0}
-                onVote={fetchSongs}
+                onVote={() => publicPlaylist && fetchSongs(publicPlaylist.id)}
               />
             </div>
           ))}
         </FlipMove>
       </div>
+
       <MusicPlayer
         song={
           songs.length > 0
@@ -80,11 +98,14 @@ const Dashboard = ({ user }) => {
             : { image: '', songTitle: '', artist: '', user: '' }
         }
       />
-      {showAddSongForm && (
+
+      {showAddSongForm && publicPlaylist && (
         <AddSongForm
+          user={user}  // Added user prop here
+          playlistId={publicPlaylist.id}
           onClose={() => setShowAddSongForm(false)}
           onAddSong={() => {
-            fetchSongs();
+            fetchSongs(publicPlaylist.id);
             setShowAddSongForm(false);
           }}
         />
