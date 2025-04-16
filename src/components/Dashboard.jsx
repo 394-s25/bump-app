@@ -33,17 +33,18 @@ const Dashboard = ({ user }) => {
   }, [fetchPublicPlaylist]);
 
   // Set up a real-time listener for songs when publicPlaylist is ready.
+  // Set up a real-time listener for songs when publicPlaylist is ready.
   useEffect(() => {
     if (publicPlaylist) {
-      // Create a query on the songs collection; we order by timestamp (or votes) if needed.
+      // Create a query on the songs collection; order by "votes" descending.
       const songsQuery = query(
         collection(db, "playlists", publicPlaylist.id, "songs"),
-        orderBy("timestamp", "desc")
+        orderBy("votes", "desc")
       );
       // Subscribe to onSnapshot for real-time updates.
       const unsubscribe = onSnapshot(songsQuery, (querySnapshot) => {
         const updatedSongs = [];
-        querySnapshot.forEach(doc => {
+        querySnapshot.forEach((doc) => {
           updatedSongs.push({ id: doc.id, ...doc.data() });
         });
         setSongs(updatedSongs);
