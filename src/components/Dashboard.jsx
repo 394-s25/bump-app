@@ -5,11 +5,26 @@ import { getPublicPlaylists, getSongsForPlaylist } from '../Firebase/playlist';
 import AddSongForm from './AddSongForm';
 import MusicPlayer from './MusicPlayer';
 import SongItem from './SongItem';
+import { useLocation } from 'react-router-dom';
 
 const Dashboard = ({ user }) => {
-  const [publicPlaylist, setPublicPlaylist] = useState(null);
+  const [activePlaylist, setActivePlaylist] = useState(null);
   const [songs, setSongs] = useState([]);
   const [showAddSongForm, setShowAddSongForm] = useState(false);
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const playlistId = queryParams.get('playlistId');
+
+  useEffect(() => {
+    const loadPlaylist = async () => {
+      if (playlistId) {
+        const songsData = await getSongsForPlaylist(playlistId);
+        setActivePlaylist({ id: playlistId, name: "Your Playlist" });
+        setSongs(songsData.sort((a, b) => b.votes - a.votes));
+      }
+    };
+    loadPlaylist();
+  }, [playlistId]);
 
   // Fetch songs for a given playlist using its ID.
   const fetchSongs = useCallback(async (playlistId) => {
@@ -22,26 +37,6 @@ const Dashboard = ({ user }) => {
     }
   }, []);
 
-  // Fetch all public playlists and pick one (here, the first one).
-  const fetchPublicPlaylist = useCallback(async () => {
-    try {
-      const publicPlaylists = await getPublicPlaylists();
-      if (publicPlaylists.length > 0) {
-        const defaultPublicPlaylist = publicPlaylists[0];
-        setPublicPlaylist(defaultPublicPlaylist);
-        // Load songs from the selected public playlist.
-        fetchSongs(defaultPublicPlaylist.id);
-      } else {
-        console.log('No public playlists found');
-      }
-    } catch (error) {
-      console.error('Error fetching public playlists:', error);
-    }
-  }, [fetchSongs]);
-
-  useEffect(() => {
-    fetchPublicPlaylist();
-  }, [fetchPublicPlaylist]);
 
   return (
     <div className="bg-lightBeige min-h-screen p-4" style={{ backgroundColor: '#fff7d5' }}>
@@ -62,7 +57,7 @@ const Dashboard = ({ user }) => {
           className="text-2xl font-bold rounded-xl px-6 py-3 text-center shadow-lg backdrop-blur-md bg-white/30 border border-white/20 text-indigo-500"
           style={{ backgroundColor: '#a7b8ff' }}
         >
-          {publicPlaylist ? publicPlaylist.name : 'Public Grooves'}
+          {activePlaylist ? activePlaylist.name : 'Public Grooves'}
         </h1>
       </header>
 
@@ -81,10 +76,10 @@ const Dashboard = ({ user }) => {
             <div key={song.id} className="mb-4 mt-4">
               <SongItem
                 user={user}
-                playlistId={publicPlaylist ? publicPlaylist.id : ''}
+                playlistId={activePlaylist ? activePlaylist.id : ''}
                 song={song}
                 isCurrent={index === 0}
-                onVote={() => publicPlaylist && fetchSongs(publicPlaylist.id)}
+                onVote={() => activePlaylist && fetchSongs(activePlaylist.id)}
               />
             </div>
           ))}
@@ -99,13 +94,13 @@ const Dashboard = ({ user }) => {
         }
       />
 
-      {showAddSongForm && publicPlaylist && (
+      {showAddSongForm && activePlaylist && (
         <AddSongForm
           user={user}  // Added user prop here
-          playlistId={publicPlaylist.id}
+          playlistId={activePlaylist.id}
           onClose={() => setShowAddSongForm(false)}
           onAddSong={() => {
-            fetchSongs(publicPlaylist.id);
+            fetchSongs(activePlaylist.id);
             setShowAddSongForm(false);
           }}
         />
