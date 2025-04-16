@@ -1,12 +1,16 @@
 // references: https://www.youtube.com/watch?v=8QgQKRcAUvM&ab_channel=GreatStack
 // references: https://www.youtube.com/watch?v=qgRoBaqhdZc&ab_channel=KrisFoster
 
+// references: https://www.youtube.com/watch?v=8QgQKRcAUvM&ab_channel=GreatStack
+// references: https://www.youtube.com/watch?v=qgRoBaqhdZc&ab_channel=KrisFoster
+
 import React, { useState } from 'react';
-import { signUpUser, signInUser } from '../Firebase/auth';
+import { signInUser, signUpUser } from '../Firebase/auth';
 
 const SignUpOrIn = ({ onAuthSuccess }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [username, setUsername] = useState(''); // New state for username
   const [isSignUp, setIsSignUp] = useState(true);
   const [error, setError] = useState(null);
 
@@ -16,7 +20,8 @@ const SignUpOrIn = ({ onAuthSuccess }) => {
     try {
       let authenticatedUser;
       if (isSignUp) {
-        authenticatedUser = await signUpUser(email, password);
+        // Pass username along with email and password during sign up.
+        authenticatedUser = await signUpUser(email, password, username);
       } else {
         authenticatedUser = await signInUser(email, password);
       }
@@ -41,7 +46,7 @@ const SignUpOrIn = ({ onAuthSuccess }) => {
     >
       <h1
         className="text-6xl font-extrabold mb-4 drop-shadow-xl" 
-        style={{ color: '#a7b8ff', textShadow: '2px 2px 0px rgba(0, 0, 0, 0.25)',}}
+        style={{ color: '#a7b8ff', textShadow: '2px 2px 0px rgba(0, 0, 0, 0.25)' }}
       >
         BUMP
       </h1>
@@ -51,6 +56,19 @@ const SignUpOrIn = ({ onAuthSuccess }) => {
         </h2>
 
         <form onSubmit={handleSubmit}>
+          {isSignUp && (
+            <div className="mb-4">
+              <label className="block mb-1 font-medium text-sm">Username</label>
+              <input
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                className="w-full p-2 rounded border border-gray-300"
+                required
+              />
+            </div>
+          )}
+
           <div className="mb-4">
             <label className="block mb-1 font-medium text-sm">Email</label>
             <input

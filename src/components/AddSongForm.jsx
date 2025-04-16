@@ -1,12 +1,9 @@
+// /src/components/AddSongForm.jsx
 import React, { useEffect, useState } from 'react';
 import { uploadSong } from '../Firebase/playlist';
 import SongSearchItem from './SongSearchItem';
 
-
-// This component now serves as a modal pop-up for adding a song. It connects to the Spotify API search endpoint (/api/search) 
-// and displays live search results as the user types. Once a song is clicked, that result is selected, and the search block is replaced
-// with the selected song information.
-const AddSongForm = ({ onClose, onAddSong }) => {
+const AddSongForm = ({ onClose, onAddSong, user, playlistId }) => {
   const [query, setQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [selectedSong, setSelectedSong] = useState(null);
@@ -18,7 +15,9 @@ const AddSongForm = ({ onClose, onAddSong }) => {
       return;
     }
     try {
-      const response = await fetch(`https://flask-api-416502417253.us-central1.run.app/search?q=${encodeURIComponent(query)}&limit=10`);
+      const response = await fetch(
+        `https://flask-api-416502417253.us-central1.run.app/search?q=${encodeURIComponent(query)}&limit=10`
+      );
       if (!response.ok) {
         throw new Error('Failed to fetch search results');
       }
@@ -49,23 +48,24 @@ const AddSongForm = ({ onClose, onAddSong }) => {
     setQuery('');
   };
 
-  // Handle adding the song; you can later integrate with your Firebase backend
+  // Handle adding the song. Notice that we are now using the passed in playlistId and user.
   const handleAdd = async () => {
     if (!selectedSong) {
       alert('Please search and select a song before adding.');
       return;
     }
     try {
-      onAddSong();
-      const userid = "MjZtStjNEGXASiKSgvHwyIiWEry1";
-      const playlistid = "HaZFJWwiSRxf2cgouR9i";
-
-      await uploadSong(userid, playlistid, selectedSong.artist, selectedSong.cover, selectedSong.name);
+      onAddSong(); // callback to refresh songs list
+      await uploadSong(
+        playlistId,
+        selectedSong.artist,
+        selectedSong.cover,
+        selectedSong.name,
+        user?.username || user?.email || "Unknown"
+      );
       console.log(selectedSong);
-
-    } catch(error) {
+    } catch (error) {
       console.error("Error adding song to Firebase:", error);
-
     }
   };
 

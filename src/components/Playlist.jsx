@@ -1,3 +1,4 @@
+// /src/components/Playlist.jsx
 import React, { useEffect, useState } from 'react';
 import { getSongsForPlaylist } from '../Firebase/playlist';
 import AddSongForm from './AddSongForm';
@@ -7,10 +8,11 @@ const Playlist = ({ user, playlist }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [songs, setSongs] = useState([]);
 
-  // Define fetchSongs as a callback to retrieve and update songs.
+  // Retrieve and update songs for the given playlist.
   const fetchSongs = async () => {
     try {
-      const songsData = await getSongsForPlaylist(user.uid, playlist.id);
+      // Now, getSongsForPlaylist only requires the playlist's ID.
+      const songsData = await getSongsForPlaylist(playlist.id);
       const sortedSongs = [...songsData].sort((a, b) => b.votes - a.votes);
       setSongs(sortedSongs);
     } catch (error) {
@@ -23,7 +25,7 @@ const Playlist = ({ user, playlist }) => {
     if (isExpanded) {
       fetchSongs();
     }
-  }, [isExpanded, user.uid, playlist.id]);
+  }, [isExpanded, playlist.id]);
 
   return (
     <div className="playlist">
@@ -39,13 +41,18 @@ const Playlist = ({ user, playlist }) => {
                 user={user}
                 playlistId={playlist.id}
                 song={song}
-                onVote={fetchSongs}  // Pass the callback to SongItem
+                onVote={fetchSongs}  // callback to refresh songs after voting
               />
             ))
           ) : (
             <p>No songs in this playlist yet.</p>
           )}
-          <AddSongForm user={user} playlistId={playlist.id} />
+          <AddSongForm 
+            user={user} 
+            playlistId={playlist.id} 
+            onClose={() => {}} 
+            onAddSong={fetchSongs} 
+          />
         </div>
       )}
     </div>
