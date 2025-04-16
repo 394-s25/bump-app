@@ -5,7 +5,11 @@ const SongSearchItem = ({ track }) => {
   const songTitle = track.name;
   const albumName = track.album || 'Unknown Album';
   const artistName = track.artist || 'Unknown Artist';
-  const albumImage = track.cover || 'https://via.placeholder.com/50'; // fallback image
+  // Check that track.cover exists and isn't just whitespace
+  const albumImage =
+    track.cover && track.cover.trim() !== ""
+      ? track.cover
+      : 'https://via.placeholder.com/50';
 
   return (
     <div
