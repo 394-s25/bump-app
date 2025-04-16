@@ -5,6 +5,7 @@ import FlipMove from 'react-flip-move';
 import { db } from '../Firebase/firebaseConfig';
 import { getPublicPlaylists } from '../Firebase/playlist';
 import AddSongForm from './AddSongForm';
+import LogoutButton from './Logoutbutton'; // Ensure you have this component
 import MusicPlayer from './MusicPlayer';
 import SongItem from './SongItem';
 
@@ -33,15 +34,12 @@ const Dashboard = ({ user }) => {
   }, [fetchPublicPlaylist]);
 
   // Set up a real-time listener for songs when publicPlaylist is ready.
-  // Set up a real-time listener for songs when publicPlaylist is ready.
   useEffect(() => {
     if (publicPlaylist) {
-      // Create a query on the songs collection; order by "votes" descending.
       const songsQuery = query(
         collection(db, "playlists", publicPlaylist.id, "songs"),
         orderBy("votes", "desc")
       );
-      // Subscribe to onSnapshot for real-time updates.
       const unsubscribe = onSnapshot(songsQuery, (querySnapshot) => {
         const updatedSongs = [];
         querySnapshot.forEach((doc) => {
@@ -51,13 +49,17 @@ const Dashboard = ({ user }) => {
       }, (error) => {
         console.error("Error listening to songs:", error);
       });
-      // Unsubscribe when the component unmounts or publicPlaylist changes.
       return () => unsubscribe();
     }
   }, [publicPlaylist]);
 
   return (
-    <div className="bg-lightBeige min-h-screen p-4" style={{ backgroundColor: '#fff7d5' }}>
+    <div className="bg-lightBeige min-h-screen p-4 relative" style={{ backgroundColor: '#fff7d5' }}>
+      {/* Logout button in top-right corner */}
+      <div style={{ position: 'absolute', top: '10px', right: '10px', zIndex: 10 }}>
+        <LogoutButton />
+      </div>
+
       <header className="text-center mb-8">
         <h1
           className="text-6xl font-extrabold text-center drop-shadow-xl"
