@@ -1,7 +1,9 @@
 // src/components/Dashboard.jsx
+import { collection, onSnapshot, orderBy, query } from 'firebase/firestore';
 import React, { useCallback, useEffect, useState } from 'react';
 import FlipMove from 'react-flip-move';
-import { getPublicPlaylists, getSongsForPlaylist } from '../Firebase/playlist';
+import { db } from '../Firebase/firebaseConfig';
+import { getPublicPlaylists } from '../Firebase/playlist';
 import AddSongForm from './AddSongForm';
 import MusicPlayer from './MusicPlayer';
 import SongItem from './SongItem';
@@ -11,17 +13,6 @@ const Dashboard = ({ user }) => {
   const [songs, setSongs] = useState([]);
   const [showAddSongForm, setShowAddSongForm] = useState(false);
 
-  // Fetch songs for a given playlist using its ID.
-  const fetchSongs = useCallback(async (playlistId) => {
-    try {
-      const songsData = await getSongsForPlaylist(playlistId);
-      const sortedSongs = songsData.sort((a, b) => b.votes - a.votes);
-      setSongs(sortedSongs);
-    } catch (error) {
-      console.error('Error fetching songs:', error);
-    }
-  }, []);
-
   // Fetch all public playlists and pick one (here, the first one).
   const fetchPublicPlaylist = useCallback(async () => {
     try {
@@ -29,19 +20,40 @@ const Dashboard = ({ user }) => {
       if (publicPlaylists.length > 0) {
         const defaultPublicPlaylist = publicPlaylists[0];
         setPublicPlaylist(defaultPublicPlaylist);
-        // Load songs from the selected public playlist.
-        fetchSongs(defaultPublicPlaylist.id);
       } else {
         console.log('No public playlists found');
       }
     } catch (error) {
       console.error('Error fetching public playlists:', error);
     }
-  }, [fetchSongs]);
+  }, []);
 
   useEffect(() => {
     fetchPublicPlaylist();
   }, [fetchPublicPlaylist]);
+
+  // Set up a real-time listener for songs when publicPlaylist is ready.
+  useEffect(() => {
+    if (publicPlaylist) {
+      // Create a query on the songs collection; we order by timestamp (or votes) if needed.
+      const songsQuery = query(
+        collection(db, "playlists", publicPlaylist.id, "songs"),
+        orderBy("timestamp", "desc")
+      );
+      // Subscribe to onSnapshot for real-time updates.
+      const unsubscribe = onSnapshot(songsQuery, (querySnapshot) => {
+        const updatedSongs = [];
+        querySnapshot.forEach(doc => {
+          updatedSongs.push({ id: doc.id, ...doc.data() });
+        });
+        setSongs(updatedSongs);
+      }, (error) => {
+        console.error("Error listening to songs:", error);
+      });
+      // Unsubscribe when the component unmounts or publicPlaylist changes.
+      return () => unsubscribe();
+    }
+  }, [publicPlaylist]);
 
   return (
     <div className="bg-lightBeige min-h-screen p-4" style={{ backgroundColor: '#fff7d5' }}>
@@ -84,7 +96,7 @@ const Dashboard = ({ user }) => {
                 playlistId={publicPlaylist ? publicPlaylist.id : ''}
                 song={song}
                 isCurrent={index === 0}
-                onVote={() => publicPlaylist && fetchSongs(publicPlaylist.id)}
+                onVote={() => {}}
               />
             </div>
           ))}
@@ -101,13 +113,10 @@ const Dashboard = ({ user }) => {
 
       {showAddSongForm && publicPlaylist && (
         <AddSongForm
-          user={user}  // Added user prop here
+          user={user}
           playlistId={publicPlaylist.id}
           onClose={() => setShowAddSongForm(false)}
-          onAddSong={() => {
-            fetchSongs(publicPlaylist.id);
-            setShowAddSongForm(false);
-          }}
+          onAddSong={() => setShowAddSongForm(false)}
         />
       )}
     </div>
