@@ -5,6 +5,7 @@ import FlipMove from 'react-flip-move';
 import { db } from '../Firebase/firebaseConfig';
 import { getPublicPlaylists } from '../Firebase/playlist';
 import AddSongForm from './AddSongForm';
+import AddUserForm from './AddUserForm';
 import LogoutButton from './Logoutbutton'; // Ensure you have this component
 import MusicPlayer from './MusicPlayer';
 import SongItem from './SongItem';
@@ -13,6 +14,8 @@ const Dashboard = ({ user }) => {
   const [publicPlaylist, setPublicPlaylist] = useState(null);
   const [songs, setSongs] = useState([]);
   const [showAddSongForm, setShowAddSongForm] = useState(false);
+  const [showAddUserForm, setShowAddUserForm] = useState(false);
+
 
   // Fetch all public playlists and pick one (here, the first one).
   const fetchPublicPlaylist = useCallback(async () => {
@@ -90,6 +93,16 @@ const Dashboard = ({ user }) => {
         </button>
       </div>
 
+      <div className="flex justify-center mb-4">
+        <button
+          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          onClick={() => setShowAddUserForm(true)}
+        >
+          Add a User Here!
+        </button>
+      </div>
+
+
       <div className="space-y-4 pb-20">
         <FlipMove>
           {songs.map((song, index) => (
@@ -122,6 +135,16 @@ const Dashboard = ({ user }) => {
           onAddSong={() => setShowAddSongForm(false)}
         />
       )}
+
+{/* 
+      {showAddUserForm && publicPlaylist && (
+        <AddUserForm
+          user={user}
+          playlistId={publicPlaylist.id}
+          onClose={() => setShowAddUserForm(false)}
+          onAddUser={() => setShowAddUserForm(false)}
+        />
+      )} */}
     </div>
   );
 };
