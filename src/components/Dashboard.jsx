@@ -1,66 +1,71 @@
 // src/components/Dashboard.jsx
 import { collection, onSnapshot, orderBy, query } from 'firebase/firestore';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import FlipMove from 'react-flip-move';
 import { db } from '../Firebase/firebaseConfig';
-import { getPublicPlaylists } from '../Firebase/playlist';
 import AddSongForm from './AddSongForm';
-import LogoutButton from './Logoutbutton'; // Ensure you have this component
+import CreatePlaylistModal from './CreatePlaylistModal';
+import LogoutButton from './Logoutbutton'; // Adjust filename casing as needed
 import MusicPlayer from './MusicPlayer';
+import PlaylistDropdown from './PlaylistDropdown';
 import SongItem from './SongItem';
 
 const Dashboard = ({ user }) => {
-  const [publicPlaylist, setPublicPlaylist] = useState(null);
+  const [selectedPlaylist, setSelectedPlaylist] = useState(null);
   const [songs, setSongs] = useState([]);
   const [showAddSongForm, setShowAddSongForm] = useState(false);
+  const [showCreatePlaylistModal, setShowCreatePlaylistModal] = useState(false);
+  const [dropdownRefreshKey, setDropdownRefreshKey] = useState(0);
 
-  // Fetch all public playlists and pick one (here, the first one).
-  const fetchPublicPlaylist = useCallback(async () => {
-    try {
-      const publicPlaylists = await getPublicPlaylists();
-      if (publicPlaylists.length > 0) {
-        const defaultPublicPlaylist = publicPlaylists[0];
-        setPublicPlaylist(defaultPublicPlaylist);
-      } else {
-        console.log('No public playlists found');
-      }
-    } catch (error) {
-      console.error('Error fetching public playlists:', error);
-    }
-  }, []);
-
+  // Real-time listener for the songs in the selected playlist.
   useEffect(() => {
-    fetchPublicPlaylist();
-  }, [fetchPublicPlaylist]);
-
-  // Set up a real-time listener for songs when publicPlaylist is ready.
-  useEffect(() => {
-    if (publicPlaylist) {
+    if (selectedPlaylist && selectedPlaylist !== "create") {
       const songsQuery = query(
-        collection(db, "playlists", publicPlaylist.id, "songs"),
+        collection(db, "playlists", selectedPlaylist.id, "songs"),
         orderBy("votes", "desc")
       );
-      const unsubscribe = onSnapshot(songsQuery, (querySnapshot) => {
-        const updatedSongs = [];
-        querySnapshot.forEach((doc) => {
-          updatedSongs.push({ id: doc.id, ...doc.data() });
-        });
-        setSongs(updatedSongs);
-      }, (error) => {
-        console.error("Error listening to songs:", error);
-      });
+      const unsubscribe = onSnapshot(
+        songsQuery,
+        (querySnapshot) => {
+          const updatedSongs = [];
+          querySnapshot.forEach((doc) => {
+            updatedSongs.push({ id: doc.id, ...doc.data() });
+          });
+          setSongs(updatedSongs);
+        },
+        (error) => {
+          console.error("Error listening to songs:", error);
+        }
+      );
       return () => unsubscribe();
     }
-  }, [publicPlaylist]);
+  }, [selectedPlaylist]);
+
+  // Called when the user selects a playlist from the dropdown.
+  const handleSelectPlaylist = (playlist) => {
+    if (playlist === "create") {
+      setShowCreatePlaylistModal(true);
+    } else {
+      setSelectedPlaylist(playlist);
+    }
+  };
+
+  // When a new playlist is created, update the selected playlist and force a refresh of PlaylistDropdown.
+  const handlePlaylistCreated = async (newPlaylistId, playlistData) => {
+    const newPlaylist = { id: newPlaylistId, ...playlistData, ownerId: user.uid };
+    setSelectedPlaylist(newPlaylist);
+    // Force PlaylistDropdown to refresh by updating its key.
+    setDropdownRefreshKey((prev) => prev + 1);
+  };
 
   return (
     <div className="bg-lightBeige min-h-screen p-4 relative" style={{ backgroundColor: '#fff7d5' }}>
       {/* Logout button in top-right corner */}
-      <div style={{ position: 'absolute', top: '10px', right: '10px', zIndex: 10 }}>
+      <div style={{ position: 'absolute', top: '10px', right: '10px', zIndex: 50 }}>
         <LogoutButton />
       </div>
 
-      <header className="text-center mb-8">
+      <header className="flex flex-col items-center mb-8">
         <h1
           className="text-6xl font-extrabold text-center drop-shadow-xl"
           style={{
@@ -70,15 +75,12 @@ const Dashboard = ({ user }) => {
         >
           BUMP
         </h1>
-      </header>
-
-      <header className="mb-4 flex justify-center">
-        <h1
-          className="text-2xl font-bold rounded-xl px-6 py-3 text-center shadow-lg backdrop-blur-md bg-white/30 border border-white/20 text-indigo-500"
-          style={{ backgroundColor: '#a7b8ff' }}
-        >
-          {publicPlaylist ? publicPlaylist.name : 'Public Grooves'}
-        </h1>
+        <PlaylistDropdown
+          key={dropdownRefreshKey}
+          user={user}
+          selectedPlaylist={selectedPlaylist}
+          onSelectPlaylist={handleSelectPlaylist}
+        />
       </header>
 
       <div className="flex justify-center mb-4">
@@ -96,7 +98,7 @@ const Dashboard = ({ user }) => {
             <div key={song.id} className="mb-4 mt-4">
               <SongItem
                 user={user}
-                playlistId={publicPlaylist ? publicPlaylist.id : ''}
+                playlistId={selectedPlaylist ? selectedPlaylist.id : ''}
                 song={song}
                 isCurrent={index === 0}
                 onVote={() => {}}
@@ -114,12 +116,20 @@ const Dashboard = ({ user }) => {
         }
       />
 
-      {showAddSongForm && publicPlaylist && (
+      {showAddSongForm && selectedPlaylist && (
         <AddSongForm
           user={user}
-          playlistId={publicPlaylist.id}
+          playlistId={selectedPlaylist.id}
           onClose={() => setShowAddSongForm(false)}
           onAddSong={() => setShowAddSongForm(false)}
+        />
+      )}
+
+      {showCreatePlaylistModal && (
+        <CreatePlaylistModal
+          user={user}
+          onClose={() => setShowCreatePlaylistModal(false)}
+          onCreate={handlePlaylistCreated}
         />
       )}
     </div>
