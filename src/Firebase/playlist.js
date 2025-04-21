@@ -1,11 +1,13 @@
 import {
   addDoc,
+  arrayUnion,
   collection,
   doc,
   getDocs,
   query,
   runTransaction,
   serverTimestamp,
+  updateDoc,
   where
 } from 'firebase/firestore';
 import { db } from './firebaseConfig.js';
@@ -193,6 +195,38 @@ export async function cancelVoteSong(playlistId, songDocId, voteType) {
     }
   } catch (error) {
     console.error("Error cancelling vote with transaction:", error);
+    throw error;
+  }
+}
+
+
+// Given a username and a playlist id:
+//  Search and get user id from databse
+//  Then share the specified playlist with the specified user
+export async function addUserToPlaylist(playlistId, username) {
+  try {
+    // Search within users collection 
+    const usersRef = collection (db, 'users');
+    const q = query(usersRef, where("username", "==", username));
+    const querySnapshot = await getDocs(q);
+
+    if (querySnapshot.empty) {
+      throw new Error("User not found");
+    }
+
+    const userId = querySnapshot.docs[0].id;
+
+    const playlistRef = doc(db, "playlists", playlistId);
+    
+
+    await updateDoc(playlistRef, {
+      sharedWith: arrayUnion(userId)
+    });
+
+    console.log(`User ${username} added to playlist ${playlistId}`)
+  }
+  catch(error) {
+    console.error("Error adding user to playlist: ", error);
     throw error;
   }
 }
