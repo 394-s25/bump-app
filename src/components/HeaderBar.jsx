@@ -2,6 +2,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import LogoutButton from './Logoutbutton';
+import { LuUser } from "react-icons/lu";
 
 /** sticky header matching dashboard background (#fff7d5) */
 const HeaderBar = ({ user, onLogout }) => (
@@ -21,15 +22,20 @@ const HeaderBar = ({ user, onLogout }) => (
           BUMP
       </h1>
     {user ? (
-      <div className="flex items-center space-x-3">
-        <Link
-          to="/profile"
-          className="underline decoration-indigo-500 text-indigo-600 hover:text-indigo-800 text-sm"
-        >
-          Hi&nbsp;{user.username || user.displayName || user.email}
-        </Link>
-        <LogoutButton onLogout={onLogout} />
-      </div>
+      <div className="flex items-center space-x-3 mr-2">
+      <Link
+        to="/profile"
+        className="text-2l font-bold flex flex-col items-center text-center"
+        style={{ color: '#a7b8ff' }}
+      >
+        <LuUser size={24} />
+        <div className="text-sm mb-1">
+          Hi,&nbsp;{user.username || user.displayName || user.email}
+        </div>
+      </Link>
+      <LogoutButton onLogout={onLogout}/>
+    </div>
+    
     ) : null}
   </header>
 );

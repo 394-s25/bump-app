@@ -76,12 +76,16 @@ const PlaylistDropdown = ({
   };
 
   return (
-    <div className="relative max-w-xs w-full">
+    <div className="flex justify-center m-4">
       <button
         type="button"
         onClick={toggle}
         className="inline-flex items-center justify-center w-10 h-10 rounded-full border border-gray-300 shadow-sm bg-white text-gray-700 hover:bg-gray-100 focus:outline-none"
         aria-label="Select Playlist"
+        style={{
+          backgroundColor: '#a7b8ff',
+          color: "white",
+        }}
       >
         <MdOutlineQueueMusic className="w-5 h-5" />
       </button>

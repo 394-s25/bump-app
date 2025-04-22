@@ -63,8 +63,11 @@ const Dashboard = ({ user }) => {
       className="bg-lightBeige min-h-screen p-4"
       style={{ backgroundColor: '#fff7d5' }}
     >
-      <header className="flex flex-col items-center mb-8">
-
+      <header className="flex flex-row items-center mb-6">
+      <div className="text-2xl font-extrabold"
+          style={{ color: '#a7b8ff'}}>
+        {selectedPlaylist ? selectedPlaylist.name : 'Select a Playlist →'}
+      </div>
         <PlaylistDropdown
           key={dropdownRefreshKey}
           user={user}
@@ -74,7 +77,7 @@ const Dashboard = ({ user }) => {
         />
         {selectedPlaylist && (
         <>
-          <div className="flex justify-center mb-4">
+          <div className="flex justify-center m-4">
             <button
               disabled={dropdownOpen}
               className={`inline-flex items-center justify-center w-10 h-10 rounded-full border border-gray-300 shadow-sm bg-white text-gray-700 hover:bg-gray-100 focus:outline-none ${
@@ -82,16 +85,24 @@ const Dashboard = ({ user }) => {
                   ? 'bg-blue-300 cursor-not-allowed'
                   : 'bg-blue-500 hover:bg-blue-600'
               }`}
+              style={{
+                backgroundColor: '#a7b8ff',
+                color: "white",
+              }}
               onClick={() => setShowAddSongForm(true)}
             >
               <PiMusicNotesPlusFill />
             </button>
           </div>
 
-          <div className="flex justify-center mb-4">
+          <div className="flex justify-center m-4">
             <button
               className="inline-flex items-center justify-center w-10 h-10 rounded-full border border-gray-300 shadow-sm bg-white text-gray-700 hover:bg-gray-100 focus:outline-none"
               onClick={() => setShowAddUserForm(true)}
+              style={{
+                backgroundColor: '#a7b8ff',
+                color: "white",
+              }}
             >
               <MdPersonAddAlt1 />
             </button>
