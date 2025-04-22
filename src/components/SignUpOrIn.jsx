@@ -1,10 +1,10 @@
 // references: https://www.youtube.com/watch?v=8QgQKRcAUvM&ab_channel=GreatStack
 // references: https://www.youtube.com/watch?v=qgRoBaqhdZc&ab_channel=KrisFoster
 
+import { collection, getDocs, query, where } from 'firebase/firestore';
 import React, { useState } from 'react';
 import { signInUser, signUpUser } from '../Firebase/auth';
-import { db } from '../Firebase/firebaseConfig'; 
-import { collection, query, where, getDocs, doc, serverTimestamp } from 'firebase/firestore';
+import { db } from '../Firebase/firebaseConfig';
 
 const SignUpOrIn = ({ onAuthSuccess }) => {
   const [email, setEmail] = useState('');
@@ -19,8 +19,7 @@ const SignUpOrIn = ({ onAuthSuccess }) => {
     try {
       let authenticatedUser;
       if (isSignUp) {
-        // Pass username along with email and password during sign up.
-        // authenticatedUser = await signUpUser(email, password, username);
+        // Check if username already exists
         const usersRef = collection(db, 'users');
         const q = query(usersRef, where('username', '==', username.trim()));
         const snap = await getDocs(q);
@@ -32,14 +31,12 @@ const SignUpOrIn = ({ onAuthSuccess }) => {
         if (!emailSnap.empty) {
           throw new Error('Oh no! That email is already in use.');
         }
-        authenticatedUser = await signUpUser(email.trim(), password);
-        const uid = authenticatedUser.uid;
-        await setDoc(doc(db, 'users', uid), {
-          username: username.trim(),
-          email:    email.trim(),
-          createdAt: serverTimestamp(),
+        authenticatedUser = await signUpUser(
+          email.trim(),
+          password,
+          username.trim()
+        );
 
-        });
       } else {
         const usersRef = collection(db, 'users');
         const q = query(usersRef, where('username', '==', username.trim()));
