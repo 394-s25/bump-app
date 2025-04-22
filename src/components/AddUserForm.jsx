@@ -7,10 +7,6 @@ const AddUserForm = ({ onClose, onAddUser, user, playlistId }) => {
 
   // Handle inviting a user to a playlist.
   const handleInvite = async () => {
-    if (!selectedSong) {
-      alert('Please search and select a song before adding.');
-      return;
-    }
     try {
       await addUserToPlaylist(
         playlistId,
@@ -46,7 +42,7 @@ const AddUserForm = ({ onClose, onAddUser, user, playlistId }) => {
           <button onClick={onClose} style={{ marginRight: '10px', padding: '8px 16px' }}>
             Cancel
           </button>
-          <button style={{ padding: '8px 16px' }}>
+          <button onClick={onAddUser} style={{ padding: '8px 16px' }}>
             Add
           </button>
         </div>

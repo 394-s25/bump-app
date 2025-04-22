@@ -143,11 +143,10 @@ const Dashboard = ({ user }) => {
         />
       )}
 
-
-      {showAddUserForm && publicPlaylist && (
+      {showAddUserForm && (
         <AddUserForm
           user={user}
-          playlistId={publicPlaylist.id}
+          playlistId={selectedPlaylist.id}
           onClose={() => setShowAddUserForm(false)}
           onAddUser={() => setShowAddUserForm(false)}
           />
