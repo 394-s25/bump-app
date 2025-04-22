@@ -62,15 +62,9 @@ const SignUpOrIn = ({ onAuthSuccess }) => {
 
   return (
     <div
-      className="min-h-screen flex flex-col items-center justify-center px-4"
+      className="min-h-screen flex flex-col items-center justify-top px-4 pt-15"
       style={{ backgroundColor: '#fff7d5' }}
     >
-      <h1
-        className="text-6xl font-extrabold mb-4 drop-shadow-xl" 
-        style={{ color: '#a7b8ff', textShadow: '2px 2px 0px rgba(0, 0, 0, 0.25)' }}
-      >
-        BUMP
-      </h1>
       <div className="w-full max-w-md bg-white p-6 rounded-xl shadow-xl border border-indigo-100">
         <h2 className="text-2xl font-bold text-center text-indigo-600 mb-4">
           {isSignUp ? 'Create Your Account' : 'Welcome Back'}
