@@ -29,7 +29,7 @@ const HeaderBar = ({ user, onLogout }) => (
         style={{ color: '#a7b8ff' }}
       >
         <LuUser size={24} />
-        <div className="text-sm mb-1">
+        <div className="text-sm mb-1 mr-2">
           Hi,&nbsp;{user.username || user.displayName || user.email}
         </div>
       </Link>
