@@ -210,6 +210,33 @@ export async function cancelVoteSong(playlistId, songDocId, voteType) {
   }
 }
 
+/**
+ * Returns the number of songs in a playlist.
+ *
+ * @param {string} playlistId - The playlist ID.
+ * @returns {Promise<number>} - Total songs in the playlist.
+ */
+export async function countSongsInPlaylist(playlistId) {
+  const snapshot = await getDocs(collection(db, "playlists", playlistId, "songs"));
+  return snapshot.size;
+}
+
+/**
+ * Builds a map of { playlistId: { name, count } } for every playlist the user owns.
+ *
+ * @param {string} userId - Owner's UID.
+ * @returns {Promise<Object>} - Counts keyed by playlist ID.
+ */
+export async function getSongCountsForUser(userId) {
+  const playlists = await getUserPlaylists(userId);
+  const result = {};
+  for (const pl of playlists) {
+    const size = await countSongsInPlaylist(pl.id);
+    result[pl.id] = { name: pl.name, count: size };
+  }
+  return result;
+}
+
 
 // Given a username and a playlist id:
 //  Search and get user id from databse
