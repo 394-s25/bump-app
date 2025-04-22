@@ -1,11 +1,10 @@
 // references: https://www.youtube.com/watch?v=8QgQKRcAUvM&ab_channel=GreatStack
 // references: https://www.youtube.com/watch?v=qgRoBaqhdZc&ab_channel=KrisFoster
 
-// references: https://www.youtube.com/watch?v=8QgQKRcAUvM&ab_channel=GreatStack
-// references: https://www.youtube.com/watch?v=qgRoBaqhdZc&ab_channel=KrisFoster
-
 import React, { useState } from 'react';
 import { signInUser, signUpUser } from '../Firebase/auth';
+import { db } from '../Firebase/firebaseConfig'; 
+import { collection, query, where, getDocs, doc, serverTimestamp } from 'firebase/firestore';
 
 const SignUpOrIn = ({ onAuthSuccess }) => {
   const [email, setEmail] = useState('');
@@ -21,7 +20,21 @@ const SignUpOrIn = ({ onAuthSuccess }) => {
       let authenticatedUser;
       if (isSignUp) {
         // Pass username along with email and password during sign up.
-        authenticatedUser = await signUpUser(email, password, username);
+        // authenticatedUser = await signUpUser(email, password, username);
+        const usersRef = collection(db, 'users');
+        const q = query(usersRef, where('username', '==', username.trim()));
+        const snap = await getDocs(q);
+        if (!snap.empty) {
+          throw new Error('Oh no! That username is already taken - please choose another.');
+        }
+        authenticatedUser = await signUpUser(email.trim(), password);
+        const uid = authenticatedUser.uid;
+        await setDoc(doc(db, 'users', uid), {
+          username: username.trim(),
+          email:    email.trim(),
+          createdAt: serverTimestamp(),
+
+        });
       } else {
         authenticatedUser = await signInUser(email, password);
       }

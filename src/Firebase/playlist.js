@@ -70,6 +70,17 @@ export async function getPublicPlaylists() {
   });
   return playlists;
 }
+
+export async function getSharedPlaylists(userId) {
+  const playlists = [];
+  const q = query(collection(db, "playlists"), where("sharedWith", "array-contains", userId));
+  const querySnapshot = await getDocs(q);
+  querySnapshot.forEach(docSnap => {
+    playlists.push({ id: docSnap.id, ...docSnap.data() });
+  });
+  return playlists;
+}
+
 /**
  * Fetch songs for a specific playlist.
  * Now assumes songs are stored under "playlists/{playlistId}/songs".
@@ -197,6 +208,33 @@ export async function cancelVoteSong(playlistId, songDocId, voteType) {
     console.error("Error cancelling vote with transaction:", error);
     throw error;
   }
+}
+
+/**
+ * Returns the number of songs in a playlist.
+ *
+ * @param {string} playlistId - The playlist ID.
+ * @returns {Promise<number>} - Total songs in the playlist.
+ */
+export async function countSongsInPlaylist(playlistId) {
+  const snapshot = await getDocs(collection(db, "playlists", playlistId, "songs"));
+  return snapshot.size;
+}
+
+/**
+ * Builds a map of { playlistId: { name, count } } for every playlist the user owns.
+ *
+ * @param {string} userId - Owner's UID.
+ * @returns {Promise<Object>} - Counts keyed by playlist ID.
+ */
+export async function getSongCountsForUser(userId) {
+  const playlists = await getUserPlaylists(userId);
+  const result = {};
+  for (const pl of playlists) {
+    const size = await countSongsInPlaylist(pl.id);
+    result[pl.id] = { name: pl.name, count: size };
+  }
+  return result;
 }
 
 
