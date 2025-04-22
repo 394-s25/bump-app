@@ -62,7 +62,7 @@ const SignUpOrIn = ({ onAuthSuccess }) => {
 
   return (
     <div
-      className="min-h-screen flex flex-col items-center justify-top px-4 pt-15"
+      className="min-h-screen flex flex-col items-center justify-top px-4 pt-10"
       style={{ backgroundColor: '#fff7d5' }}
     >
       <div className="w-full max-w-md bg-white p-6 rounded-xl shadow-xl border border-indigo-100">
