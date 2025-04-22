@@ -26,17 +26,29 @@ const SignUpOrIn = ({ onAuthSuccess }) => {
         if (!snap.empty) {
           throw new Error('Oh no! That username is already taken - please choose another.');
         }
+        const emailQuery      = query(usersRef, where('email', '==', email.trim()));
+        const emailSnap       = await getDocs(emailQuery);
+        if (!emailSnap.empty) {
+          throw new Error('Oh no! That email is already in use.');
+        }
         authenticatedUser = await signUpUser(
           email.trim(),
           password,
           username.trim()
         );
+
       } else {
-        authenticatedUser = await signInUser(email, password);
+        const usersRef = collection(db, 'users');
+        const q = query(usersRef, where('username', '==', username.trim()));
+        const snap = await getDocs(q);
+        if (snap.empty) {
+          throw new Error('No account found for that username.');
+        }
+        const userDoc = snap.docs[0].data();
+        const userEmail = userDoc.email;
+        authenticatedUser = await signInUser(userEmail, password);
       }
-      if (onAuthSuccess) {
         onAuthSuccess(authenticatedUser);
-      }
     } catch (err) {
       console.error('Authentication error:', err);
       setError(err.message);
@@ -65,29 +77,28 @@ const SignUpOrIn = ({ onAuthSuccess }) => {
         </h2>
 
         <form onSubmit={handleSubmit}>
-          {isSignUp && (
             <div className="mb-4">
               <label className="block mb-1 font-medium text-sm">Username</label>
               <input
                 type="text"
                 value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                onChange={e => setUsername(e.target.value)}
+                className="w-full p-2 rounded border border-gray-300"
+                required
+              />
+            </div> 
+          {isSignUp && (
+            <div className="mb-4">
+              <label className="block mb-1 font-medium text-sm">Email</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="w-full p-2 rounded border border-gray-300"
                 required
               />
             </div>
           )}
-
-          <div className="mb-4">
-            <label className="block mb-1 font-medium text-sm">Email</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full p-2 rounded border border-gray-300"
-              required
-            />
-          </div>
 
           <div className="mb-4">
             <label className="block mb-1 font-medium text-sm">Password</label>
