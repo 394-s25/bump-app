@@ -37,7 +37,7 @@ const AddUserForm = ({ onClose, onAddUser, user, playlistId }) => {
             <input
               type="text"
               placeholder="Search for user by username..."
-              value={user}
+              value={query}
               onChange={(e) => setQuery(e.target.value)}
               style={{ width: '100%', padding: '8px' }}
             />

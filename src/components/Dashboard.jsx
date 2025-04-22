@@ -136,7 +136,7 @@ const Dashboard = ({ user }) => {
         />
       )}
 
-{/* 
+
       {showAddUserForm && publicPlaylist && (
         <AddUserForm
           user={user}
@@ -144,7 +144,7 @@ const Dashboard = ({ user }) => {
           onClose={() => setShowAddUserForm(false)}
           onAddUser={() => setShowAddUserForm(false)}
         />
-      )} */}
+      )}
     </div>
   );
 };
