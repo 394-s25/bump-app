@@ -1,39 +1,58 @@
-// /src/App.jsx
 import { onAuthStateChanged } from 'firebase/auth';
 import React, { useEffect, useState } from 'react';
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { auth } from './Firebase/firebaseConfig';
+import { getUserProfile } from './Firebase/user'; // helper to pull username
 import Dashboard from './components/Dashboard';
+import HeaderBar from './components/HeaderBar';
+import Profile from './components/Profile';
 import SignUpOrIn from './components/SignUpOrIn';
 
 function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Listen for authentication state changes.
+  // persist session & enrich with Firestore profile
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-      if (firebaseUser) {
-        // Optionally, you can merge the profile data here if needed
-        setUser(firebaseUser);
+    const unsub = onAuthStateChanged(auth, async (fbUser) => {
+      if (fbUser) {
+        try {
+          const profile = await getUserProfile(fbUser.uid);
+          setUser({ ...fbUser, ...profile });
+        } catch {
+          setUser(fbUser);          // fallback if no profile
+        }
       } else {
         setUser(null);
       }
       setLoading(false);
     });
-    return () => unsubscribe();
+    return unsub;
   }, []);
 
-  if (loading) {
-    return <div>Loading...</div>; // Or a spinner
-  }
+  if (loading) return <p className="p-4">Loading…</p>;
 
-  // If there is no user, show the login/signup page.
-  if (!user) {
-    return <SignUpOrIn onAuthSuccess={setUser} />;
-  }
+  return (
+    <BrowserRouter>
+      <HeaderBar user={user} onLogout={() => setUser(null)} />
 
-  // If there is a user, show the dashboard.
-  return <Dashboard user={user} />;
+      <Routes>
+        <Route
+          path="/"
+          element={user ? <Dashboard user={user} /> : <Navigate to="/login" replace />}
+        />
+        <Route
+          path="/login"
+          element={!user ? <SignUpOrIn onAuthSuccess={setUser} /> : <Navigate to="/" replace />}
+        />
+        <Route
+          path="/profile"
+          element={user ? <Profile user={user} /> : <Navigate to="/login" replace />}
+        />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </BrowserRouter>
+  );
 }
 
 export default App;
