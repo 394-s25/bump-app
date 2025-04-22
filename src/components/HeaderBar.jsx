@@ -1,7 +1,6 @@
 // src/components/HeaderBar.jsx
 import React from 'react';
 import { Link } from 'react-router-dom';
-import LoginButton from './LoginButton';
 import LogoutButton from './LogoutButton';
 
 /** sticky header matching dashboard background (#fff7d5) */
@@ -15,8 +14,7 @@ const HeaderBar = ({ user, onLogout }) => (
       backgroundColor: '#fff7d5',
     }}
   >
-    {!user && <LoginButton />}
-    {user && (
+    {user ? (
       <div className="flex items-center space-x-3">
         <Link
           to="/profile"
@@ -26,7 +24,7 @@ const HeaderBar = ({ user, onLogout }) => (
         </Link>
         <LogoutButton onLogout={onLogout} />
       </div>
-    )}
+    ) : null}
   </header>
 );
 
