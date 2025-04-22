@@ -48,13 +48,21 @@ const PlaylistDropdown = ({
   }, [playlists]);
   
   /** fetch accessible playlists */
+  /** notify parent of open / close */
   useEffect(() => {
-    if (!user) return;
-    (async () => {
+    if (onOpenChange) onOpenChange(dropdownOpen);
+  }, [dropdownOpen, onOpenChange]);
+
+  /** toggle helper */
+  const toggle = async () => {
+    const newState = !dropdownOpen;
+    setDropdownOpen(newState);
+    
+    if (newState && user) {
       try {
         const owned = await getUserPlaylists(user.uid);
         const shared = await getSharedPlaylists(user.uid);
-        const pub   = await getPublicPlaylists();
+        const pub = await getPublicPlaylists();
         const combined = [
           ...owned,
           ...shared,
@@ -65,20 +73,11 @@ const PlaylistDropdown = ({
         ).sort((a, b) => a.name.localeCompare(b.name));
         setPlaylists(unique);
       } catch (err) {
-        console.error('Playlist fetch error:', err);
+        console.error('Playlist refresh error:', err);
       }
-    })();
-  }, [user]);
-
-
-  /** notify parent of open / close */
-  useEffect(() => {
-    if (onOpenChange) onOpenChange(dropdownOpen);
-  }, [dropdownOpen, onOpenChange]);
-
-  /** toggle helper */
-  const toggle = () => setDropdownOpen(o => !o);
-
+    }
+  };
+  
   return (
     <div className="relative max-w-xs w-full">
       <button
