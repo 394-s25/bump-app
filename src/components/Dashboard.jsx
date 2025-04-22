@@ -13,43 +13,36 @@ const Dashboard = ({ user }) => {
   const [selectedPlaylist, setSelectedPlaylist] = useState(null);
   const [songs, setSongs] = useState([]);
   const [showAddSongForm, setShowAddSongForm] = useState(false);
-  const [showCreatePlaylistModal, setShowCreatePlaylistModal] = useState(false);
+  const [showCreatePlaylistModal, setShowCreatePlaylistModal] =
+    useState(false);
   const [dropdownRefreshKey, setDropdownRefreshKey] = useState(0);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [notice, setNotice] = useState('');
 
-  /** real‑time listener for songs in the chosen playlist */
+  /** realtime songs */
   useEffect(() => {
-    if (selectedPlaylist && selectedPlaylist !== 'create') {
-      const songsQuery = query(
-        collection(db, 'playlists', selectedPlaylist.id, 'songs'),
-        orderBy('votes', 'desc')
-      );
-
-      const unsubscribe = onSnapshot(
-        songsQuery,
-        snap => {
-          const updated = [];
-          snap.forEach(doc => updated.push({ id: doc.id, ...doc.data() }));
-          setSongs(updated);
-        },
-        err => console.error('Error listening to songs:', err)
-      );
-
-      return () => unsubscribe();
-    }
+    if (!selectedPlaylist || selectedPlaylist === 'create') return;
+    const q = query(
+      collection(db, 'playlists', selectedPlaylist.id, 'songs'),
+      orderBy('votes', 'desc')
+    );
+    const unsub = onSnapshot(q, snap => {
+      const arr = [];
+      snap.forEach(d => arr.push({ id: d.id, ...d.data() }));
+      setSongs(arr);
+    });
+    return unsub;
   }, [selectedPlaylist]);
 
-  /** from PlaylistDropdown */
-  const handleSelectPlaylist = playlist => {
-    if (playlist === 'create') {
-      setShowCreatePlaylistModal(true);
-    } else {
-      setSelectedPlaylist(playlist);
-    }
+  /** select playlist callback */
+  const handleSelectPlaylist = pl => {
+    if (pl === 'create') setShowCreatePlaylistModal(true);
+    else setSelectedPlaylist(pl);
   };
 
-  /** after creating playlist */
-  const handlePlaylistCreated = (newId, data) => {
-    setSelectedPlaylist({ id: newId, ...data, ownerId: user.uid });
+  /** after new playlist created */
+  const handlePlaylistCreated = (id, data) => {
+    setSelectedPlaylist({ id, ...data, ownerId: user.uid });
     setDropdownRefreshKey(k => k + 1);
   };
 
@@ -58,14 +51,10 @@ const Dashboard = ({ user }) => {
       className="bg-lightBeige min-h-screen p-4"
       style={{ backgroundColor: '#fff7d5' }}
     >
-      {/* page title + playlist chooser */}
       <header className="flex flex-col items-center mb-8">
         <h1
           className="text-6xl font-extrabold drop-shadow-xl mb-2"
-          style={{
-            color: '#a7b8ff',
-            textShadow: '2px 2px 0 rgba(0,0,0,0.25)',
-          }}
+          style={{ color: '#a7b8ff', textShadow: '2px 2px 0 rgba(0,0,0,.25)' }}
         >
           BUMP
         </h1>
@@ -75,24 +64,42 @@ const Dashboard = ({ user }) => {
           user={user}
           selectedPlaylist={selectedPlaylist}
           onSelectPlaylist={handleSelectPlaylist}
+          onOpenChange={setDropdownOpen}
         />
       </header>
 
-      {/* add‑song trigger */}
+      {notice && (
+        <div className="mb-4 px-4 py-2 text-sm text-center text-white bg-red-500 rounded">
+          {notice}
+        </div>
+      )}
+
+      {/* add‑song button disabled while dropdown open */}
       <div className="flex justify-center mb-4">
         <button
-          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-          onClick={() => setShowAddSongForm(true)}
+          disabled={dropdownOpen}
+          className={`px-4 py-2 text-white rounded ${
+            dropdownOpen
+              ? 'bg-blue-300 cursor-not-allowed'
+              : 'bg-blue-500 hover:bg-blue-600'
+          }`}
+          onClick={() => {
+            if (!selectedPlaylist) {
+              setNotice('Please select a playlist first.');
+              setTimeout(() => setNotice(''), 3000);
+              return;
+            }
+            setShowAddSongForm(true);
+          }}
         >
           Add a Song Here!
         </button>
       </div>
 
-      {/* songs list */}
       <div className="space-y-4 pb-20">
         <FlipMove>
           {songs.map((song, idx) => (
-            <div key={song.id} className="mb-4">
+            <div key={song.id}>
               <SongItem
                 user={user}
                 playlistId={selectedPlaylist ? selectedPlaylist.id : ''}
@@ -105,7 +112,6 @@ const Dashboard = ({ user }) => {
         </FlipMove>
       </div>
 
-      {/* now‑playing bar */}
       <MusicPlayer
         song={
           songs.length
@@ -114,7 +120,6 @@ const Dashboard = ({ user }) => {
         }
       />
 
-      {/* pop‑ups */}
       {showAddSongForm && selectedPlaylist && (
         <AddSongForm
           user={user}
