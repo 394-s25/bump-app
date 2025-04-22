@@ -1,20 +1,20 @@
-// /src/components/AddUserForm.jsx
+// // /src/components/AddUserForm.jsx
 import React, { useState } from 'react';
 import { addUserToPlaylist } from '../Firebase/playlist.js';
 
 const AddUserForm = ({ onClose, onAddUser, user, playlistId }) => {
   const [query, setQuery] = useState('');
+  const [error, setError] = useState(''); // NEW: error state
 
-  // Handle inviting a user to a playlist.
   const handleInvite = async () => {
     try {
-      await addUserToPlaylist(
-        playlistId,
-        query
-      );
+      await addUserToPlaylist(playlistId, query);
       setQuery('');
+      setError(''); // clear error if successful
+      onAddUser();
     } catch (error) {
       console.error("Error adding user to playlist:", error);
+      setError("User not found. Please try again."); // SET error message
     }
   };
 
@@ -29,20 +29,30 @@ const AddUserForm = ({ onClose, onAddUser, user, playlistId }) => {
         width: '400px', maxWidth: '90%'
       }}>
         <h2>invite user</h2>
-          <div style={{ marginBottom: '15px' }}>
-            <input
-              type="text"
-              placeholder="Search for user by username..."
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              style={{ width: '100%', padding: '8px' }}
-            />
-          </div>
+        
+        <div style={{ marginBottom: '15px' }}>
+          <input
+            type="text"
+            placeholder="Search for user by username..."
+            value={query}
+            onChange={(e) => {
+              setQuery(e.target.value);
+              setError(''); // clear error when typing
+            }}
+            style={{ width: '100%', padding: '8px' }}
+          />
+          {error && (
+            <div style={{ color: 'red', marginTop: '5px' }}>
+              {error}
+            </div>
+          )}
+        </div>
+
         <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
           <button onClick={onClose} style={{ marginRight: '10px', padding: '8px 16px' }}>
             Cancel
           </button>
-          <button onClick={onAddUser} style={{ padding: '8px 16px' }}>
+          <button onClick={handleInvite} style={{ padding: '8px 16px' }}>
             Add
           </button>
         </div>

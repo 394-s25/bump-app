@@ -23,6 +23,11 @@ const Dashboard = ({ user }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [notice, setNotice] = useState('');
 
+
+  useEffect(()=>{
+    console.log(selectedPlaylist)
+  }, [selectedPlaylist]);
+
   /** realtime songs */
   useEffect(() => {
     if (!selectedPlaylist || selectedPlaylist === 'create') return;
@@ -77,37 +82,32 @@ const Dashboard = ({ user }) => {
           {notice}
         </div>
       )}
+      {selectedPlaylist && (
+        <>
+          <div className="flex justify-center mb-4">
+            <button
+              disabled={dropdownOpen}
+              className={`px-4 py-2 text-white rounded ${
+                dropdownOpen
+                  ? 'bg-blue-300 cursor-not-allowed'
+                  : 'bg-blue-500 hover:bg-blue-600'
+              }`}
+              onClick={() => setShowAddSongForm(true)}
+            >
+              Add a Song Here!
+            </button>
+          </div>
 
-      {/* add‑song button disabled while dropdown open */}
-      <div className="flex justify-center mb-4">
-        <button
-          disabled={dropdownOpen}
-          className={`px-4 py-2 text-white rounded ${
-            dropdownOpen
-              ? 'bg-blue-300 cursor-not-allowed'
-              : 'bg-blue-500 hover:bg-blue-600'
-          }`}
-          onClick={() => {
-            if (!selectedPlaylist) {
-              setNotice('Please select a playlist first.');
-              setTimeout(() => setNotice(''), 3000);
-              return;
-            }
-            setShowAddSongForm(true);
-          }}
-        >
-          Add a Song Here!
-        </button>
-      </div>
-
-      <div className="flex justify-center mb-4">
-        <button
-          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-          onClick={() => setShowAddUserForm(true)}
-        >
-          Add a User Here!
-        </button>
-      </div>
+          <div className="flex justify-center mb-4">
+            <button
+              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+              onClick={() => setShowAddUserForm(true)}
+            >
+              Add a User Here!
+            </button>
+          </div>
+        </>
+      )}
 
 
       <div className="space-y-4 pb-20">
@@ -143,7 +143,7 @@ const Dashboard = ({ user }) => {
         />
       )}
 
-      {showAddUserForm && (
+      {showAddUserForm && selectedPlaylist && (
         <AddUserForm
           user={user}
           playlistId={selectedPlaylist.id}
@@ -151,6 +151,7 @@ const Dashboard = ({ user }) => {
           onAddUser={() => setShowAddUserForm(false)}
           />
         )}
+
       {showCreatePlaylistModal && (
         <CreatePlaylistModal
           user={user}

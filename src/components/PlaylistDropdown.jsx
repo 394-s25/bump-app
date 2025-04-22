@@ -6,6 +6,8 @@ import {
   getUserPlaylists,
 } from '../Firebase/playlist';
 
+import { getUserProfile } from '../Firebase/user';
+
 /**
  * Props:
  *  user                – current user
@@ -21,7 +23,30 @@ const PlaylistDropdown = ({
 }) => {
   const [playlists, setPlaylists] = useState([]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [ownerUsernames, setOwnerUsernames] = useState({});
 
+  useEffect(() => {
+    const fetchMissingUsernames = async () => {
+      const missing = playlists.filter(pl =>
+        pl.ownerId !== user.uid && !ownerUsernames[pl.ownerId]
+      );
+  
+      const updated = { ...ownerUsernames };
+      for (const pl of missing) {
+        try {
+          const data = await getUserProfile(pl.ownerId);
+          updated[pl.ownerId] = data.username;
+        } catch (err) {
+          updated[pl.ownerId] = 'unknown';
+        }
+      }
+  
+      setOwnerUsernames(updated);
+    };
+  
+    fetchMissingUsernames();
+  }, [playlists]);
+  
   /** fetch accessible playlists */
   useEffect(() => {
     if (!user) return;
@@ -44,6 +69,7 @@ const PlaylistDropdown = ({
       }
     })();
   }, [user]);
+
 
   /** notify parent of open / close */
   useEffect(() => {
@@ -98,7 +124,7 @@ const PlaylistDropdown = ({
                       ? 'Public'
                       : pl.ownerId === user.uid
                       ? 'by you'
-                      : `by ${pl.ownerId}`}
+                      : `by ${ownerUsernames[pl.ownerId] || '...'}`}
                   </span>
                 </div>
               </button>
