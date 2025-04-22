@@ -241,6 +241,8 @@ export async function getSongCountsForUser(userId) {
 // Given a username and a playlist id:
 //  Search and get user id from databse
 //  Then share the specified playlist with the specified user
+
+
 export async function addUserToPlaylist(playlistId, username) {
   try {
     // Search within users collection 
