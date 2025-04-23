@@ -1,12 +1,12 @@
 // src/components/PlaylistDropdown.jsx
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { MdOutlineQueueMusic } from "react-icons/md";
 import {
   getPublicPlaylists,
   getSharedPlaylists,
   getUserPlaylists,
 } from '../Firebase/playlist';
 import { getUserProfile } from '../Firebase/user';
-import { MdOutlineQueueMusic } from "react-icons/md";
 
 /**
  * Props:
@@ -24,6 +24,7 @@ const PlaylistDropdown = ({
   const [playlists, setPlaylists] = useState([]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [ownerUsernames, setOwnerUsernames] = useState({});
+  const dropdownRef = useRef(null);
 
   useEffect(() => {
     const fetchMissingUsernames = async () => {
@@ -51,6 +52,19 @@ const PlaylistDropdown = ({
     if (onOpenChange) onOpenChange(dropdownOpen);
   }, [dropdownOpen, onOpenChange]);
 
+  useEffect(() => {
+    if (!dropdownOpen) return;
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setDropdownOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [dropdownOpen]);
+
   const toggle = async () => {
     const newState = !dropdownOpen;
     setDropdownOpen(newState);
@@ -76,7 +90,7 @@ const PlaylistDropdown = ({
   };
 
   return (
-    <div className="flex justify-center m-4">
+    <div ref={dropdownRef} className="flex justify-center m-4">
       <button
         type="button"
         onClick={toggle}
@@ -91,7 +105,10 @@ const PlaylistDropdown = ({
       </button>
 
       {dropdownOpen && (
-        <div className="absolute left-0 right-0 mt-2 mx-auto max-w-xs w-full rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
+        <div
+          className="absolute left-0 right-0 mt-2 mx-auto max-w-xs w-full rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-50"
+          style={{ backgroundColor: '#fff7d5' }}
+        >
           <div className="py-1 max-h-60 overflow-y-auto overscroll-contain">
             {playlists.map((pl) => (
               <button
@@ -100,7 +117,7 @@ const PlaylistDropdown = ({
                   onSelectPlaylist(pl);
                   setDropdownOpen(false);
                 }}
-                className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-[#e8e0b8]"
               >
                 <div className="flex justify-between">
                   <span>{pl.name}</span>
@@ -115,13 +132,14 @@ const PlaylistDropdown = ({
               </button>
             ))}
           </div>
-          <div className="px-4 py-2 border-t">
+          <div className="px-4 py-2 border-t" style={{ borderColor: '#a7b8ff' }}>
             <button
               onClick={() => {
                 onSelectPlaylist('create');
                 setDropdownOpen(false);
               }}
-              className="w-full text-left text-sm text-indigo-600 font-semibold hover:underline"
+              className="w-full text-left text-sm font-semibold hover:underline"
+              style={{ color: '#a7b8ff' }}
             >
               Create a Playlist
             </button>

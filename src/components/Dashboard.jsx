@@ -5,7 +5,6 @@ import FlipMove from 'react-flip-move';
 import { db } from '../Firebase/firebaseConfig';
 import AddSongForm from './AddSongForm';
 import AddUserForm from './AddUserForm';
-import LogoutButton from './Logoutbutton'; // Ensure you have this component
 import CreatePlaylistModal from './CreatePlaylistModal';
 import MusicPlayer from './MusicPlayer';
 import PlaylistDropdown from './PlaylistDropdown';
