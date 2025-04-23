@@ -10,6 +10,9 @@ import CreatePlaylistModal from './CreatePlaylistModal';
 import MusicPlayer from './MusicPlayer';
 import PlaylistDropdown from './PlaylistDropdown';
 import SongItem from './SongItem';
+import { MdPersonAddAlt1 } from "react-icons/md";
+import { PiMusicNotesPlusFill } from "react-icons/pi";
+
 
 const Dashboard = ({ user }) => {
   const [selectedPlaylist, setSelectedPlaylist] = useState(null);
@@ -60,14 +63,11 @@ const Dashboard = ({ user }) => {
       className="bg-lightBeige min-h-screen p-4"
       style={{ backgroundColor: '#fff7d5' }}
     >
-      <header className="flex flex-col items-center mb-8">
-        <h1
-          className="text-6xl font-extrabold drop-shadow-xl mb-2"
-          style={{ color: '#a7b8ff', textShadow: '2px 2px 0 rgba(0,0,0,.25)' }}
-        >
-          BUMP
-        </h1>
-
+      <header className="flex flex-row items-center mb-6">
+      <div className="text-2xl font-extrabold"
+          style={{ color: '#a7b8ff'}}>
+        {selectedPlaylist ? selectedPlaylist.name : 'Select a Playlist →'}
+      </div>
         <PlaylistDropdown
           key={dropdownRefreshKey}
           user={user}
@@ -75,6 +75,41 @@ const Dashboard = ({ user }) => {
           onSelectPlaylist={handleSelectPlaylist}
           onOpenChange={setDropdownOpen}
         />
+        {selectedPlaylist && (
+        <>
+          <div className="flex justify-center m-4">
+            <button
+              disabled={dropdownOpen}
+              className={`inline-flex items-center justify-center w-10 h-10 rounded-full border border-gray-300 shadow-sm bg-white text-gray-700 hover:bg-gray-100 focus:outline-none ${
+                dropdownOpen
+                  ? 'bg-blue-300 cursor-not-allowed'
+                  : 'bg-blue-500 hover:bg-blue-600'
+              }`}
+              style={{
+                backgroundColor: '#a7b8ff',
+                color: "white",
+              }}
+              onClick={() => setShowAddSongForm(true)}
+            >
+              <PiMusicNotesPlusFill />
+            </button>
+          </div>
+
+          <div className="flex justify-center m-4">
+            <button
+              className="inline-flex items-center justify-center w-10 h-10 rounded-full border border-gray-300 shadow-sm bg-white text-gray-700 hover:bg-gray-100 focus:outline-none"
+              onClick={() => setShowAddUserForm(true)}
+              style={{
+                backgroundColor: '#a7b8ff',
+                color: "white",
+              }}
+            >
+              <MdPersonAddAlt1 />
+            </button>
+          </div>
+        </>
+      )}
+
       </header>
 
       {notice && (
@@ -82,33 +117,7 @@ const Dashboard = ({ user }) => {
           {notice}
         </div>
       )}
-      {selectedPlaylist && (
-        <>
-          <div className="flex justify-center mb-4">
-            <button
-              disabled={dropdownOpen}
-              className={`px-4 py-2 text-white rounded ${
-                dropdownOpen
-                  ? 'bg-blue-300 cursor-not-allowed'
-                  : 'bg-blue-500 hover:bg-blue-600'
-              }`}
-              onClick={() => setShowAddSongForm(true)}
-            >
-              Add a Song Here!
-            </button>
-          </div>
-
-          <div className="flex justify-center mb-4">
-            <button
-              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-              onClick={() => setShowAddUserForm(true)}
-            >
-              Add a User Here!
-            </button>
-          </div>
-        </>
-      )}
-
+      
 
       <div className="space-y-4 pb-20">
         <FlipMove>

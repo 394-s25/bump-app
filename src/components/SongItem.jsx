@@ -101,14 +101,14 @@ const SongItem = ({ user, playlistId, song, onVote, isCurrent }) => {
           onClick={handleUpvote}
           className={`text-xl ${userVote === 'upvote' ? 'text-green-600' : 'text-gray-400'} ${userVote === 'upvote' ? 'hover:text-green-800' : 'hover:text-green-600'}`}
         >
-          <CiSquareChevUp size={28} />
+          <CiSquareChevUp size={42} />
         </button>
-        <span className="w-5 text-center">{song.votes}</span>
+        <span className="w-5 text-center text-lg">{song.votes}</span>
         <button
           onClick={handleDownvote}
           className={`text-xl ${userVote === 'downvote' ? 'text-red-600' : 'text-gray-400'} ${userVote === 'downvote' ? 'hover:text-red-800' : 'hover:text-red-600'}`}
         >
-          <CiSquareChevDown size={28} />
+          <CiSquareChevDown size={42} />
         </button>
       </div>
     </div>

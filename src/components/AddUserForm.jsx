@@ -28,7 +28,7 @@ const AddUserForm = ({ onClose, onAddUser, user, playlistId }) => {
         background: 'white', padding: '20px', borderRadius: '8px',
         width: '400px', maxWidth: '90%'
       }}>
-        <h2>invite user</h2>
+        <h2>Invite User</h2>
         
         <div style={{ marginBottom: '15px' }}>
           <input
