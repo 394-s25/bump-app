@@ -1,7 +1,10 @@
 // src/components/Dashboard.jsx
-import { collection, onSnapshot, orderBy, query } from 'firebase/firestore';
+
 import React, { useEffect, useState } from 'react';
+import { collection, onSnapshot, orderBy, query } from 'firebase/firestore';
 import FlipMove from 'react-flip-move';
+import { MdPersonAddAlt1 } from 'react-icons/md';
+import { PiMusicNotesPlusFill } from 'react-icons/pi';
 import { db } from '../Firebase/firebaseConfig';
 import AddSongForm from './AddSongForm';
 import AddUserForm from './AddUserForm';
@@ -9,28 +12,22 @@ import CreatePlaylistModal from './CreatePlaylistModal';
 import MusicPlayer from './MusicPlayer';
 import PlaylistDropdown from './PlaylistDropdown';
 import SongItem from './SongItem';
-import { MdPersonAddAlt1 } from "react-icons/md";
-import { PiMusicNotesPlusFill } from "react-icons/pi";
-
 
 const Dashboard = ({ user }) => {
   const [selectedPlaylist, setSelectedPlaylist] = useState(null);
   const [songs, setSongs] = useState([]);
   const [showAddSongForm, setShowAddSongForm] = useState(false);
   const [showAddUserForm, setShowAddUserForm] = useState(false);
-
-  const [showCreatePlaylistModal, setShowCreatePlaylistModal] =
-    useState(false);
+  const [showCreatePlaylistModal, setShowCreatePlaylistModal] = useState(false);
   const [dropdownRefreshKey, setDropdownRefreshKey] = useState(0);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [notice, setNotice] = useState('');
 
-
-  useEffect(()=>{
-    console.log(selectedPlaylist)
+  useEffect(() => {
+    console.log(selectedPlaylist);
   }, [selectedPlaylist]);
 
-  /** realtime songs */
+  // realtime songs listener
   useEffect(() => {
     if (!selectedPlaylist || selectedPlaylist === 'create') return;
     const q = query(
@@ -45,28 +42,27 @@ const Dashboard = ({ user }) => {
     return unsub;
   }, [selectedPlaylist]);
 
-  /** select playlist callback */
   const handleSelectPlaylist = pl => {
     if (pl === 'create') setShowCreatePlaylistModal(true);
     else setSelectedPlaylist(pl);
   };
 
-  /** after new playlist created */
   const handlePlaylistCreated = (id, data) => {
     setSelectedPlaylist({ id, ...data, ownerId: user.uid });
     setDropdownRefreshKey(k => k + 1);
   };
 
   return (
-    <div
-      className="bg-lightBeige min-h-screen p-4"
-      style={{ backgroundColor: '#fff7d5' }}
-    >
-      <header className="flex flex-row items-center mb-6">
-      <div className="text-2xl font-extrabold"
-          style={{ color: '#a7b8ff'}}>
-        {selectedPlaylist ? selectedPlaylist.name : 'Select a Playlist →'}
-      </div>
+    <div className="
+      min-h-screen p-4
+      bg-lightBeige dark:bg-darkBg
+      text-gray-900    dark:text-darkText
+    ">
+      <header className="flex items-center mb-6">
+        <div className="text-2xl font-extrabold text-blue-300 dark:text-blue-400">
+          {selectedPlaylist ? selectedPlaylist.name : 'Select a Playlist →'}
+        </div>
+
         <PlaylistDropdown
           key={dropdownRefreshKey}
           user={user}
@@ -74,49 +70,46 @@ const Dashboard = ({ user }) => {
           onSelectPlaylist={handleSelectPlaylist}
           onOpenChange={setDropdownOpen}
         />
-        {selectedPlaylist && (
-        <>
-          <div className="flex justify-center m-4">
-            <button
-              disabled={dropdownOpen}
-              className={`inline-flex items-center justify-center w-10 h-10 rounded-full border border-gray-300 shadow-sm bg-white text-gray-700 hover:bg-gray-100 focus:outline-none ${
-                dropdownOpen
-                  ? 'bg-blue-300 cursor-not-allowed'
-                  : 'bg-blue-500 hover:bg-blue-600'
-              }`}
-              style={{
-                backgroundColor: '#a7b8ff',
-                color: "white",
-              }}
-              onClick={() => setShowAddSongForm(true)}
-            >
-              <PiMusicNotesPlusFill />
-            </button>
-          </div>
-
-          <div className="flex justify-center m-4">
-            <button
-              className="inline-flex items-center justify-center w-10 h-10 rounded-full border border-gray-300 shadow-sm bg-white text-gray-700 hover:bg-gray-100 focus:outline-none"
-              onClick={() => setShowAddUserForm(true)}
-              style={{
-                backgroundColor: '#a7b8ff',
-                color: "white",
-              }}
-            >
-              <MdPersonAddAlt1 />
-            </button>
-          </div>
-        </>
-      )}
-
       </header>
 
+      {selectedPlaylist && (
+        <div className="flex space-x-4 mb-6">
+          <button
+            disabled={dropdownOpen}
+            onClick={() => setShowAddSongForm(true)}
+            className="
+              inline-flex items-center justify-center w-10 h-10 rounded-full border shadow-sm
+              bg-blue-300 text-white hover:bg-blue-400 focus:outline-none
+              dark:bg-blue-600 dark:hover:bg-blue-700 dark:border-gray-600
+            "
+            aria-label="Add song"
+          >
+            <PiMusicNotesPlusFill />
+          </button>
+
+          <button
+            onClick={() => setShowAddUserForm(true)}
+            className="
+              inline-flex items-center justify-center w-10 h-10 rounded-full border shadow-sm
+              bg-blue-300 text-white hover:bg-blue-400 focus:outline-none
+              dark:bg-blue-600 dark:hover:bg-blue-700 dark:border-gray-600
+            "
+            aria-label="Add user"
+          >
+            <MdPersonAddAlt1 />
+          </button>
+        </div>
+      )}
+
       {notice && (
-        <div className="mb-4 px-4 py-2 text-sm text-center text-white bg-red-500 rounded">
+        <div className="
+          mb-4 px-4 py-2 text-sm text-white
+          bg-red-500 dark:bg-red-600
+          rounded
+        ">
           {notice}
         </div>
       )}
-      
 
       <div className="space-y-4 pb-20">
         <FlipMove>
@@ -157,8 +150,8 @@ const Dashboard = ({ user }) => {
           playlistId={selectedPlaylist.id}
           onClose={() => setShowAddUserForm(false)}
           onAddUser={() => setShowAddUserForm(false)}
-          />
-        )}
+        />
+      )}
 
       {showCreatePlaylistModal && (
         <CreatePlaylistModal
