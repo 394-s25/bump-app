@@ -11,7 +11,7 @@ export default {
         lightBeige2: '#f9fafb',  
         darkBg:    '#1f2937',
         darkCard:  '#374151',
-        darkText:  '#e5e7eb',
+        darkText:  '#d1d5db',
         darkBg2:   '#2C3A4D',
       }
     },
