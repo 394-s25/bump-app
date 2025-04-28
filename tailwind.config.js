@@ -1,20 +1,18 @@
-// tailwind.config.js
 /** @type {import('tailwindcss').Config} */
 export default {
-  darkMode: 'class',         // added dark mode
+  darkMode: 'class',
   content: [
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
     extend: {
       colors: {
-        lightBeige: '#fff7d5',
-        lightBeige2: '#fdf9e9',
-          //testing dark mode
+        lightBeige:  '#ffffff',  
+        lightBeige2: '#f9fafb',  
         darkBg:    '#1f2937',
         darkCard:  '#374151',
         darkText:  '#e5e7eb',
-        darkBg2: '#2C3A4D',
+        darkBg2:   '#2C3A4D',
       }
     },
   },
