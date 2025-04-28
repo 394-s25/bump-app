@@ -9,10 +9,12 @@ export default {
     extend: {
       colors: {
         lightBeige: '#fff7d5',
+        lightBeige2: '#fdf9e9',
           //testing dark mode
         darkBg:    '#1f2937',
         darkCard:  '#374151',
         darkText:  '#e5e7eb',
+        darkBg2: '#2C3A4D',
       }
     },
   },
