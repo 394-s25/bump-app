@@ -4,8 +4,15 @@ import { FaSpotify } from 'react-icons/fa';
 // Your Spotify app credentials - Client ID can be public, Client Secret should never be here
 const CLIENT_ID = "4f8f98b0dd534355bee6085dbcaf284f";
 
-// Use root URL without path for local development
-const REDIRECT_URI = "http://127.0.0.1:5173/";
+// Dynamically determine the correct redirect URI based on the environment
+const REDIRECT_URI = window.location.hostname === 'bump-8dc73.web.app' 
+  ? 'https://bump-8dc73.web.app/' 
+  : 'http://127.0.0.1:5173/';
+
+// Also determine the API URL based on environment
+const API_URL = window.location.hostname === 'bump-8dc73.web.app'
+  ? 'https://YOUR_CLOUD_RUN_SERVICE_URL' // Replace with your Cloud Run URL after deploying
+  : 'http://127.0.0.1:5000';
 
 const SpotifyLogin = ({ onLogin }) => {
   const handleLoginClick = () => {
@@ -23,7 +30,7 @@ const SpotifyLogin = ({ onLogin }) => {
     
     // Add query parameters
     authUrl.searchParams.append("client_id", CLIENT_ID);
-    authUrl.searchParams.append("response_type", "code"); // Changed to code for Authorization Code Flow
+    authUrl.searchParams.append("response_type", "code");
     authUrl.searchParams.append("redirect_uri", REDIRECT_URI);
     
     // Add state parameter to identify this is an auth callback

@@ -9,10 +9,16 @@ import Profile from './components/Profile';
 import SignUpOrIn from './components/SignUpOrIn';
 import SpotifyCallback from './components/SpotifyCallback';
 
-// Create a separate component that will be used inside the Router context
-// Add console logs for debugging and improve the auth handler
+// Define API URL based on environment
+const API_URL = window.location.hostname === 'bump-8dc73.web.app'
+  ? 'https://YOUR_CLOUD_RUN_SERVICE_URL' // Replace with your actual Cloud Run URL after deployment
+  : 'http://127.0.0.1:5000';
 
-// Update AuthHandlerWithRouter to handle token from hash fragment instead of code
+// Define redirect URI based on environment
+const REDIRECT_URI = window.location.hostname === 'bump-8dc73.web.app'
+  ? 'https://bump-8dc73.web.app/'
+  : 'http://127.0.0.1:5173/';
+
 const AuthHandlerWithRouter = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -23,20 +29,24 @@ const AuthHandlerWithRouter = ({ children }) => {
     const code = urlParams.get('code');
     const state = urlParams.get('state');
     
-    // If this is the root path and we have a code with the right state
+    // If we have a code with the right state
     if (code && state === 'spotify_auth_callback') {
-      console.log("Processing Spotify auth code");
+      console.log(`Processing Spotify auth code in ${window.location.hostname}`);
       
       // Exchange code for token using your Flask API
-      fetch('http://127.0.0.1:5000/spotify-auth', {  // Changed URL to local server
+      fetch(`${API_URL}/spotify-auth`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json' 
         },
-        body: JSON.stringify({ code, redirect_uri: "http://127.0.0.1:5173/" })
+        body: JSON.stringify({ 
+          code, 
+          redirect_uri: REDIRECT_URI  // Dynamic redirect URI based on environment
+        })
       })
       .then(response => {
         if (!response.ok) {
+          console.error(`API response error: ${response.status}`);
           throw new Error('Failed to exchange code for token: ' + response.status);
         }
         return response.json();
