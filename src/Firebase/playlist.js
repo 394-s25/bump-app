@@ -106,9 +106,10 @@ export async function getSongsForPlaylist(playlistId) {
  * @param {string} image - The image URL.
  * @param {string} songTitle - The title of the song.
  * @param {string} [user='default'] - The name of the user adding the song.
+ * @param {string} [spotifyUri=null] - The Spotify URI for playback.
  * @returns {Promise<string>} - The ID of the newly added song document.
  */
-export async function uploadSong(playlistId, artist, image, songTitle, user = "default") {
+export async function uploadSong(playlistId, artist, image, songTitle, user = "default", spotifyUri = null) {
   try {
     const docRef = await addDoc(
       collection(db, "playlists", playlistId, "songs"),
@@ -118,7 +119,8 @@ export async function uploadSong(playlistId, artist, image, songTitle, user = "d
         songTitle,
         user,
         timestamp: serverTimestamp(),
-        votes: 0
+        votes: 0,
+        spotifyUri // Add the Spotify URI for playback
       }
     );
     console.log("Song added with ID:", docRef.id);
