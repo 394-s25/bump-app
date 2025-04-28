@@ -54,7 +54,7 @@ const Dashboard = ({ user }) => {
         console.log("- Is owner?", playlistData.ownerId === user.uid);
         console.log("- Shared with:", playlistData.sharedWith || []);
         console.log("- Is in shared list?", playlistData.sharedWith?.includes(user.uid));
-        console.log("- Is public?", playlistData.isPublic === true);
+        // console.log("- Is public?", playlistData.isPublic === true);
         
         const canModify = playlistData.ownerId === user.uid || 
                          playlistData.sharedWith?.includes(user.uid);

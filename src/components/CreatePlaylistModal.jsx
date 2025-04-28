@@ -13,7 +13,7 @@ const CreatePlaylistModal = ({ user, onClose, onCreate }) => {
       return;
     }
     try {
-      const newPlaylistId = await createPlaylist(user.uid, playlistName, isPublic, []);
+      const newPlaylistId = await createPlaylist(user.uid, playlistName, []);
       // Pass both the newPlaylistId and playlist data so the dashboard can update correctly.
       onCreate(newPlaylistId, { name: playlistName, isPublic, sharedWith: [] });
       onClose();
@@ -35,14 +35,6 @@ const CreatePlaylistModal = ({ user, onClose, onCreate }) => {
             value={playlistName}
             onChange={(e) => setPlaylistName(e.target.value)}
             className="w-full p-2 border rounded"
-          />
-        </div>
-        <div className="mb-4 flex items-center">
-          <label className="mr-2 text-sm font-medium">Public?</label>
-          <input
-            type="checkbox"
-            checked={isPublic}
-            onChange={(e) => setIsPublic(e.target.checked)}
           />
         </div>
         <div className="flex justify-end space-x-2">
