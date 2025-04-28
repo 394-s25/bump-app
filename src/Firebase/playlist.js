@@ -2,11 +2,13 @@ import {
   addDoc,
   arrayUnion,
   collection,
+  deleteDoc,
   doc,
   getDocs,
   query,
   runTransaction,
   serverTimestamp,
+  setDoc,
   updateDoc,
   where
 } from 'firebase/firestore';
@@ -106,9 +108,10 @@ export async function getSongsForPlaylist(playlistId) {
  * @param {string} image - The image URL.
  * @param {string} songTitle - The title of the song.
  * @param {string} [user='default'] - The name of the user adding the song.
+ * @param {string} [spotifyUri=null] - The Spotify URI for playback.
  * @returns {Promise<string>} - The ID of the newly added song document.
  */
-export async function uploadSong(playlistId, artist, image, songTitle, user = "default") {
+export async function uploadSong(playlistId, artist, image, songTitle, user = "default", spotifyUri = null) {
   try {
     const docRef = await addDoc(
       collection(db, "playlists", playlistId, "songs"),
@@ -118,7 +121,8 @@ export async function uploadSong(playlistId, artist, image, songTitle, user = "d
         songTitle,
         user,
         timestamp: serverTimestamp(),
-        votes: 0
+        votes: 0,
+        spotifyUri // Add the Spotify URI for playback
       }
     );
     console.log("Song added with ID:", docRef.id);
@@ -267,6 +271,82 @@ export async function addUserToPlaylist(playlistId, username) {
   }
   catch(error) {
     console.error("Error adding user to playlist: ", error);
+    throw error;
+  }
+}
+
+/**
+ * Get the current playback state for a playlist
+ */
+export async function getPlaybackState(playlistId) {
+  try {
+    const playbackRef = doc(db, "playlists", playlistId, "playback_state", "current");
+    const snapshot = await getDoc(playbackRef);
+    if (snapshot.exists()) {
+      return snapshot.data();
+    }
+    return null;
+  } catch (error) {
+    console.error("Error getting playback state:", error);
+    return null;
+  }
+}
+
+/**
+ * Set up or update the playback state for a playlist
+ */
+export async function updatePlaybackState(playlistId, playbackData) {
+  try {
+    console.log(`Updating playback state for playlist ${playlistId}`, playbackData);
+    const playbackRef = doc(db, "playlists", playlistId, "playback_state", "current");
+    await setDoc(playbackRef, {
+      ...playbackData,
+      updatedAt: serverTimestamp()
+    }, { merge: true });
+    return true;
+  } catch (error) {
+    console.error("Error updating playback state:", error);
+    throw error;
+  }
+}
+
+/**
+ * Check if user can modify a playlist
+ */
+export async function canUserModifyPlaylist(playlistId, userId) {
+  try {
+    const playlistRef = doc(db, "playlists", playlistId);
+    const snapshot = await getDoc(playlistRef);
+    
+    if (!snapshot.exists()) return false;
+    
+    const playlist = snapshot.data();
+    return (
+      playlist.ownerId === userId || 
+      (playlist.sharedWith && playlist.sharedWith.includes(userId))
+    );
+  } catch (error) {
+    console.error("Error checking user permissions:", error);
+    return false;
+  }
+}
+
+/**
+ * Enhanced removeSongFromPlaylist with better error logging
+ */
+export async function removeSongFromPlaylist(playlistId, songId) {
+  try {
+    console.log(`Attempting to remove song ${songId} from playlist ${playlistId}`);
+    const songRef = doc(db, "playlists", playlistId, "songs", songId);
+    await deleteDoc(songRef);
+    console.log(`Song ${songId} successfully removed`);
+    return true;
+  } catch (error) {
+    console.error(`Error removing song ${songId}:`, error);
+    // Check if it's a permission error
+    if (error.code === 'permission-denied') {
+      console.error("Permission denied. Check if user has rights to modify this playlist");
+    }
     throw error;
   }
 }

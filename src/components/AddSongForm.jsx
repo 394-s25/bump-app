@@ -1,4 +1,3 @@
-// /src/components/AddSongForm.jsx
 import React, { useEffect, useState } from 'react';
 import { uploadSong } from '../Firebase/playlist';
 import SongSearchItem from './SongSearchItem';
@@ -54,16 +53,31 @@ const AddSongForm = ({ onClose, onAddSong, user, playlistId }) => {
       alert('Please search and select a song before adding.');
       return;
     }
+    
+    // Ensure we have a proper Spotify URI from the search results
+    let spotifyUri = selectedSong.spotify_uri;
+    
+    // If the API returns a spotify_url instead of uri, extract the URI
+    if (!spotifyUri && selectedSong.spotify_url) {
+      const match = selectedSong.spotify_url.match(/track\/([a-zA-Z0-9]+)/);
+      if (match && match[1]) {
+        spotifyUri = `spotify:track:${match[1]}`;
+      }
+    }
+    
+    // Debug log
+    console.log("Adding song with URI:", spotifyUri);
+    
     try {
-      onAddSong(); // callback to refresh songs list
       await uploadSong(
         playlistId,
         selectedSong.artist,
         selectedSong.cover,
         selectedSong.name,
-        user?.username || user?.email || "Unknown"
+        user?.username || user?.email || "Unknown",
+        spotifyUri  // Make sure this is not null
       );
-      console.log(selectedSong);
+      onAddSong();
     } catch (error) {
       console.error("Error adding song to Firebase:", error);
     }
