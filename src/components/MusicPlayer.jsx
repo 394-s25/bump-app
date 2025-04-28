@@ -11,7 +11,8 @@ const MusicPlayer = ({
   position = 0,
   duration = 100,
   onSeek,
-  formatTime
+  formatTime,
+  isActive = true // New prop to indicate if there's an active device
 }) => {
   
   const handleVolumeChange = (e) => {
@@ -31,6 +32,12 @@ const MusicPlayer = ({
 
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-white text-black px-6 py-4 flex items-center justify-between z-50 border-t shadow-md" style={{ backgroundColor: '#a7b8ff' }}>
+      {/* Show connection status indicator */}
+      {!isActive && (
+        <div className="absolute top-0 left-0 right-0 bg-yellow-500 text-white text-xs text-center py-1">
+          No active Spotify device - Someone needs to connect to control playback
+        </div>
+      )}
 
       <section className="flex items-center gap-4 min-w-[250px]" >
         <img
@@ -46,10 +53,18 @@ const MusicPlayer = ({
 
       <section className="flex flex-col items-center flex-1 max-w-xl mx-8" >
         <div className="flex items-center gap-4 mb-1">
-          <button onClick={togglePlay} className="text-black text-2xl mb-3 mt-3">
+          <button 
+            onClick={togglePlay} 
+            className={`text-black text-2xl mb-3 mt-3 ${!isActive && 'opacity-50'}`}
+            disabled={!isActive}
+          >
             {isPlaying ? <CiPause1 size={28} /> : <CiPlay1 size={28} />}
           </button>
-          <button className="text-black text-2xl mb-3 mt-3" onClick={nextTrack}>
+          <button 
+            className={`text-black text-2xl mb-3 mt-3 ${!isActive && 'opacity-50'}`} 
+            onClick={nextTrack}
+            disabled={!isActive}
+          >
             <CiCircleChevRight size={28} />
           </button>
         </div>
@@ -61,7 +76,8 @@ const MusicPlayer = ({
             max="100"
             value={duration > 0 ? (Math.min(position, duration) * 100 / duration) : 0}
             onChange={handleSeek}
-            className="w-full accent-yellow-50"
+            className={`w-full accent-yellow-50 ${!isActive && 'opacity-50'}`}
+            disabled={!isActive}
           />
           <span className="text-xs text-black">{totalTime}</span>
         </div>
@@ -75,8 +91,9 @@ const MusicPlayer = ({
           max="100"
           value={volume}
           onChange={handleVolumeChange}
-          className="w-24 accent-yellow-50"
-          style = {{ background: '#fff' }}
+          className={`w-24 accent-yellow-50 ${!isActive && 'opacity-50'}`}
+          style={{ background: '#fff' }}
+          disabled={!isActive}
         />
       </section>
     </div>

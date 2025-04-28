@@ -5,24 +5,18 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 
 app = Flask(__name__)
-# Update CORS to include both your development and production URLs
-CORS(app, origins=["https://bump-8dc73.web.app", "http://127.0.0.1:5173"])
+CORS(app)  # Enable CORS for all routes
 
 # Spotify API credentials
 CLIENT_ID = "4f8f98b0dd534355bee6085dbcaf284f"
-# For production, use environment variables instead of hardcoding secrets
-CLIENT_SECRET = os.environ.get('SPOTIFY_CLIENT_SECRET', "2117ebbb02c143b48d3d683ce6dda012")
-
-# Default redirect URI that can be overridden
-DEFAULT_REDIRECT_URI = os.environ.get('DEFAULT_REDIRECT_URI', 'http://127.0.0.1:5173/')
+CLIENT_SECRET = "2117ebbb02c143b48d3d683ce6dda012"  # Make sure to keep this secure in production
 
 @app.route('/spotify-auth', methods=['POST'])
 def spotify_auth():
     # Get the authorization code from the request
     data = request.json
     code = data.get('code')
-    # Use the redirect URI from the request or fall back to the default
-    redirect_uri = data.get('redirect_uri', DEFAULT_REDIRECT_URI)
+    redirect_uri = data.get('redirect_uri', 'http://127.0.0.1:5173/')
     
     if not code:
         return jsonify({"error": "No authorization code provided"}), 400
@@ -58,11 +52,9 @@ def spotify_auth():
 
 @app.route('/health', methods=['GET'])
 def health_check():
-    return jsonify({"status": "healthy", "message": "Spotify auth server is running"})
+    return jsonify({"status": "healthy", "message": "Local auth server is running"})
 
 if __name__ == '__main__':
-    # Use PORT environment variable for Cloud Run
-    port = int(os.environ.get('PORT', 5000))
-    # Bind to 0.0.0.0 for Cloud Run
-    app.run(debug=os.environ.get('DEBUG', 'True').lower() == 'true',
-            host='0.0.0.0', port=port)
+    # Run the Flask app on port 5000
+    print("Starting local auth server on http://127.0.0.1:5000")
+    app.run(debug=True, host='127.0.0.1', port=5000)
