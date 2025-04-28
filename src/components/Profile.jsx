@@ -18,8 +18,7 @@ const Profile = ({ user }) => {
 
   return (
     <div
-      className="min-h-screen p-6"
-      style={{ backgroundColor: '#fff7d5' }}
+      className="min-h-screen p-6 bg-white dark:bg-darkBg dark:text-blue-300"
     >
       {/* back‑to‑dashboard */}
       <Link
