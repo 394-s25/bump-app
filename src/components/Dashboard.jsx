@@ -247,18 +247,32 @@ const Dashboard = ({ user }) => {
         </FlipMove>
       </div>
 
-      {/* Replace MusicPlayer with SpotifyPlayer */}
-      {spotifyToken ? (
-        <SpotifyPlayer 
-          token={spotifyToken}
-          songUri={songs.length > 0 && songs[0].spotifyUri ? songs[0].spotifyUri : null}
-          songData={songs.length > 0 ? songs[0] : { image: '', songTitle: '', artist: '', user: '' }}
-        />
-      ) : (
-        <div className="fixed bottom-0 left-0 right-0 bg-white text-black px-6 py-4 flex items-center justify-center z-50 border-t shadow-md" 
-          style={{ backgroundColor: '#a7b8ff' }}>
-          <p>Please login to Spotify to play music</p>
-        </div>
+      {/* Spotify Player - only owner can control music */}
+      {selectedPlaylist && (
+        <>
+          {selectedPlaylist.ownerId === user.uid ? (
+            // Owner view - show player if they're connected to Spotify
+            spotifyToken ? (
+              <SpotifyPlayer 
+                token={spotifyToken}
+                songUri={songs.length > 0 && songs[0].spotifyUri ? songs[0].spotifyUri : null}
+                songData={songs.length > 0 ? songs[0] : { image: '', songTitle: '', artist: '', user: '' }}
+              />
+            ) : (
+              // Owner needs to connect to Spotify
+              <div className="fixed bottom-0 left-0 right-0 bg-white text-black px-6 py-4 flex items-center justify-center z-50 border-t shadow-md" 
+                style={{ backgroundColor: '#a7b8ff' }}>
+                <p>Please connect your Spotify account in your Profile to control music.</p>
+              </div>
+            )
+          ) : (
+            // Non-owner view - show message that only owner can control
+            <div className="fixed bottom-0 left-0 right-0 bg-white text-black px-6 py-4 flex items-center justify-center z-50 border-t shadow-md" 
+              style={{ backgroundColor: '#a7b8ff' }}>
+              <p>Only the playlist owner can control music.</p>
+            </div>
+          )}
+        </>
       )}
 
       {showAddSongForm && selectedPlaylist && (
