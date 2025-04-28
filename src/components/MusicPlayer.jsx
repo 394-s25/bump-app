@@ -59,7 +59,7 @@ const MusicPlayer = ({
             type="range"
             min="0"
             max="100"
-            value={position ? (position * 100 / duration) : 0}
+            value={duration > 0 ? (Math.min(position, duration) * 100 / duration) : 0}
             onChange={handleSeek}
             className="w-full accent-yellow-50"
           />

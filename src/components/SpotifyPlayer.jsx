@@ -75,6 +75,7 @@ const SpotifyPlayer = ({ token, songUri, songData }) => {
           setLoadingState('device-offline');
         });
 
+        // IMPORTANT: This is the fixed player_state_changed listener, properly placed inside the SDK ready handler
         player.addListener('player_state_changed', state => {
           if (!state) {
             console.log('No player state available');
@@ -92,9 +93,13 @@ const SpotifyPlayer = ({ token, songUri, songData }) => {
               user: songData?.user || 'Spotify',
             });
             
+            // These two lines are critical for syncing UI with actual playback
             setIsPlaying(!state.paused);
             setPosition(state.position);
             setDuration(state.duration);
+            
+            // Log state changes to help with debugging
+            console.log(`Player state update: position=${state.position}ms, duration=${state.duration}ms, paused=${state.paused}`);
           } catch (err) {
             console.error('Error processing player state:', err);
           }
@@ -156,9 +161,7 @@ const SpotifyPlayer = ({ token, songUri, songData }) => {
         window.onSpotifyWebPlaybackSDKReady = null;
       }
     };
-  }, [token]);
-
-  
+  }, [token, volume, songData]);
 
   // Play song when songUri changes with enhanced logging and error handling
   useEffect(() => {
@@ -251,9 +254,17 @@ const SpotifyPlayer = ({ token, songUri, songData }) => {
     }
     
     console.log("Toggling playback state");
+    
+    // Update UI immediately for better responsiveness
+    setIsPlaying(!isPlaying);
+    
     player.togglePlay()
       .then(() => console.log("Playback state toggled"))
-      .catch(err => console.error("Error toggling playback:", err));
+      .catch(err => {
+        console.error("Error toggling playback:", err);
+        // Reset UI state if there was an error
+        setIsPlaying(isPlaying);
+      });
   };
 
   // Handle next track
@@ -287,7 +298,7 @@ const SpotifyPlayer = ({ token, songUri, songData }) => {
       return;
     }
     
-    const seekMs = seekPos * duration / 100;
+    const seekMs = (seekPos * duration) / 100;
     console.log("Seeking to position:", seekMs, "ms");
     player.seek(seekMs)
       .then(() => console.log("Seek position updated"))
@@ -302,6 +313,33 @@ const SpotifyPlayer = ({ token, songUri, songData }) => {
     const seconds = totalSeconds % 60;
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
+
+  // Add position tracking with interval timer
+  useEffect(() => {
+    let intervalId;
+    
+    // If music is playing, update the position every 1000ms (1 second)
+    if (isPlaying && duration > 0) {
+      intervalId = setInterval(() => {
+        // Update position based on elapsed time since last update
+        setPosition(prevPosition => {
+          // Don't exceed the duration
+          const newPosition = Math.min(prevPosition + 1000, duration);
+          return newPosition;
+        });
+      }, 1000);
+      
+      console.log("Started position tracking interval");
+    }
+    
+    // Clean up the interval when playback stops or component unmounts
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+        console.log("Cleared position tracking interval");
+      }
+    };
+  }, [isPlaying, duration]);
 
   // Use either Spotify track data or provided song data
   const displaySongData = currentTrack || songData || {
