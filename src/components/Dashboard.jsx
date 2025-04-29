@@ -6,28 +6,81 @@ import FlipMove from 'react-flip-move';
 import { MdPersonAddAlt1 } from 'react-icons/md';
 import { PiMusicNotesPlusFill } from 'react-icons/pi';
 import { db } from '../Firebase/firebaseConfig';
+import { removeSongFromPlaylist } from '../Firebase/playlist';
 import AddSongForm from './AddSongForm';
 import AddUserForm from './AddUserForm';
 import CreatePlaylistModal from './CreatePlaylistModal';
-import MusicPlayer from './MusicPlayer';
 import PlaylistDropdown from './PlaylistDropdown';
 import SongItem from './SongItem';
+import SpotifyLogin from './SpotifyLogin'; // New import for login component
+import SpotifyPlayer from './SpotifyPlayer'; // Changed from MusicPlayer to SpotifyPlayer
+
 
 const Dashboard = ({ user }) => {
   const [selectedPlaylist, setSelectedPlaylist] = useState(null);
   const [songs, setSongs] = useState([]);
   const [showAddSongForm, setShowAddSongForm] = useState(false);
   const [showAddUserForm, setShowAddUserForm] = useState(false);
-  const [showCreatePlaylistModal, setShowCreatePlaylistModal] = useState(false);
+  const [spotifyToken, setSpotifyToken] = useState(null);
+  const [showCreatePlaylistModal, setShowCreatePlaylistModal] =
+    useState(false);
   const [dropdownRefreshKey, setDropdownRefreshKey] = useState(0);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [notice, setNotice] = useState('');
 
+  // Test function to verify the token works and debug Spotify SDK issues
+  const testSpotify = async () => {
+    if (!spotifyToken) {
+      alert("No Spotify token available");
+      return;
+    }
+    
+    try {
+      console.log("Testing Spotify token:", spotifyToken.substring(0, 10) + "...");
+      
+      const response = await fetch('https://api.spotify.com/v1/me', {
+        headers: {
+          'Authorization': `Bearer ${spotifyToken}`
+        }
+      });
+      
+      console.log("Spotify API response status:", response.status);
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Spotify API error response:", errorText);
+        throw new Error(`HTTP error ${response.status}`);
+      }
+      
+      const data = await response.json();
+      console.log("Spotify user data:", data);
+      alert(`Spotify API connection working! Hello, ${data.display_name || 'User'}`);
+      
+      // Check player details
+      if (songs.length > 0 && songs[0].spotifyUri) {
+        console.log("Top song URI available:", songs[0].spotifyUri);
+      } else {
+        console.log("No song URI available in top song");
+      }
+    } catch (error) {
+      console.error("Spotify API test error:", error);
+      alert(`Spotify API error: ${error.message}`);
+    }
+  };
+
   useEffect(() => {
-    console.log(selectedPlaylist);
+    console.log(selectedPlaylist)
   }, [selectedPlaylist]);
 
-  // realtime songs listener
+  // Check for Spotify token in localStorage on component mount
+  useEffect(() => {
+    const token = localStorage.getItem('spotify_access_token');
+    if (token) {
+      setSpotifyToken(token);
+    }
+  }, []);
+
+  /** realtime songs */
   useEffect(() => {
     if (!selectedPlaylist || selectedPlaylist === 'create') return;
     const q = query(
@@ -42,6 +95,50 @@ const Dashboard = ({ user }) => {
     return unsub;
   }, [selectedPlaylist]);
 
+
+  useEffect(() => {
+    // Check if token needs refreshing
+    const checkTokenExpiry = () => {
+      const expiry = localStorage.getItem('spotify_token_expiry');
+      if (!expiry || !spotifyToken) return;
+      
+      // If token is expired or about to expire, we need to re-authenticate
+      if (Date.now() > parseInt(expiry) - (5 * 60 * 1000)) {
+        // Replace setStatus with setNotice since that's what's defined in this component
+        setNotice('Spotify session expired. Please reconnect.');
+        setSpotifyToken(null);
+        localStorage.removeItem('spotify_access_token');
+        localStorage.removeItem('spotify_token_expiry');
+      }
+    };
+    
+    // Check on component mount and every minute
+    checkTokenExpiry();
+    const interval = setInterval(checkTokenExpiry, 60 * 1000);
+    
+    return () => clearInterval(interval);
+  }, [spotifyToken]);
+  
+  // Add another useEffect to detect token changes in localStorage
+  useEffect(() => {
+    // This will help detect when the token is added by AuthHandlerWithRouter
+    const handleStorageChange = () => {
+      const token = localStorage.getItem('spotify_access_token');
+      if (token && token !== spotifyToken) {
+        console.log("Token detected in localStorage, updating player");
+        setSpotifyToken(token);
+      }
+    };
+    
+    // Check immediately and also add a listener
+    handleStorageChange();
+    
+    // Listen for storage events (changes from other tabs/components)
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, [spotifyToken]);
+
+  /** select playlist callback */
   const handleSelectPlaylist = pl => {
     if (pl === 'create') setShowCreatePlaylistModal(true);
     else setSelectedPlaylist(pl);
@@ -50,6 +147,12 @@ const Dashboard = ({ user }) => {
   const handlePlaylistCreated = (id, data) => {
     setSelectedPlaylist({ id, ...data, ownerId: user.uid });
     setDropdownRefreshKey(k => k + 1);
+  };
+
+  // Handle successful Spotify login
+  const handleSpotifyLogin = (token) => {
+    setSpotifyToken(token);
+    localStorage.setItem('spotify_access_token', token);
   };
 
   return (
@@ -102,6 +205,24 @@ const Dashboard = ({ user }) => {
           </>
         )}
 
+      {!spotifyToken && (
+        <div className="flex justify-center m-4">
+          <SpotifyLogin onLogin={handleSpotifyLogin} />
+        </div>
+      )}
+      
+      {/* Add the debug button when spotify token is available */}
+      {spotifyToken && (
+        <div className="flex justify-center m-4">
+          <button 
+            onClick={testSpotify}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors"
+            style={{ backgroundColor: '#4CAF50' }}
+          >
+            Test Spotify Connection
+          </button>
+        </div>
+      )}
       </header>
 
       {notice && (
@@ -113,7 +234,6 @@ const Dashboard = ({ user }) => {
           {notice}
         </div>
       )}
-
       <div className="space-y-4 pb-20">
         <FlipMove>
           {songs.map((song, idx) => (
@@ -130,13 +250,29 @@ const Dashboard = ({ user }) => {
         </FlipMove>
       </div>
 
-      <MusicPlayer
-        song={
-          songs.length
-            ? songs[0]
-            : { image: '', songTitle: '', artist: '', user: '' }
-        }
-      />
+      {/* Spotify Player - only owner can control music */}
+      {selectedPlaylist && songs.length > 0 && (
+        selectedPlaylist.ownerId === user.uid ? (
+          spotifyToken ? (
+            <SpotifyPlayer
+              token={spotifyToken}
+              songUri={songs[0].spotifyUri}
+              songData={songs[0]}
+              onTrackEnd={songId =>
+                removeSongFromPlaylist(selectedPlaylist.id, songId)
+              }
+            />
+          ) : (
+            <div className="fixed bottom-0 …">
+              <p>Please connect your Spotify account in your Profile to control music.</p>
+            </div>
+          )
+        ) : (
+          <div className="fixed bottom-0 …">
+            <p>Only the playlist owner can control music.</p>
+          </div>
+        )
+      )}
 
       {showAddSongForm && selectedPlaylist && (
         <AddSongForm
