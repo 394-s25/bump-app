@@ -27,12 +27,17 @@ const PlaylistDropdown = ({
   const [ownerUsernames, setOwnerUsernames] = useState({});
   const dropdownRef = useRef(null);
 
+  // Fixed infinite loop
   useEffect(() => {
     const fetchMissingUsernames = async () => {
       const missing = playlists.filter(
         (pl) => pl.ownerId !== user.uid && !ownerUsernames[pl.ownerId]
       );
+      if (missing.length === 0) return;
+  
       const updated = { ...ownerUsernames };
+      let updatedFlag = false;
+  
       for (const pl of missing) {
         try {
           const data = await getUserProfile(pl.ownerId);
@@ -40,12 +45,17 @@ const PlaylistDropdown = ({
         } catch {
           updated[pl.ownerId] = 'unknown';
         }
+        updatedFlag = true;
       }
-      setOwnerUsernames(updated);
+  
+      if (updatedFlag) {
+        setOwnerUsernames(updated);
+      }
     };
+  
     fetchMissingUsernames();
-  }, [playlists, ownerUsernames, user.uid]);
-
+  }, [playlists, user.uid]);
+  
   useEffect(() => {
     if (onOpenChange) onOpenChange(dropdownOpen);
   }, [dropdownOpen, onOpenChange]);

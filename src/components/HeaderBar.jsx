@@ -25,7 +25,7 @@ const HeaderBar = ({ user, onLogout }) => {
     <header
       className={`
         w-full flex justify-between items-center p-4 shadow
-        sticky top-0 z-1000
+        sticky top-0
         bg-lightBeige dark:bg-darkBg
         text-gray-900    dark:text-darkText
       `}
