@@ -11,7 +11,7 @@ const REDIRECT_URI = window.location.hostname === 'bump-8dc73.web.app'
 
 // Also determine the API URL based on environment
 const API_URL = window.location.hostname === 'bump-8dc73.web.app'
-  ? 'https://YOUR_CLOUD_RUN_SERVICE_URL' // Replace with your Cloud Run URL after deploying
+  ? 'https://bump-app-416502417253.us-central1.run.app/' // Replace with your Cloud Run URL after deploying
   : 'http://127.0.0.1:5000';
 
 const SpotifyLogin = ({ onLogin }) => {
