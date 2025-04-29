@@ -19,7 +19,7 @@ const loadSpotifyScript = () => {
   document.body.appendChild(script);
 };
 
-const SpotifyPlayer = ({ token, songUri, songData }) => {
+const SpotifyPlayer = ({ token, songUri, songData, onTrackEnd }) => {
   const [player, setPlayer] = useState(null);
   const [deviceId, setDeviceId] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -94,12 +94,16 @@ const SpotifyPlayer = ({ token, songUri, songData }) => {
             });
             
             // These two lines are critical for syncing UI with actual playback
-            setIsPlaying(!state.paused);
             setPosition(state.position);
             setDuration(state.duration);
+            setIsPlaying(!state.paused);
             
             // Log state changes to help with debugging
             console.log(`Player state update: position=${state.position}ms, duration=${state.duration}ms, paused=${state.paused}`);
+            if (state.paused && state.position === 0 && onTrackEnd) {
+              console.log('Track ended, removing from playlist…');
+              onTrackEnd(songData.id);
+            }
           } catch (err) {
             console.error('Error processing player state:', err);
           }
@@ -246,6 +250,7 @@ const SpotifyPlayer = ({ token, songUri, songData }) => {
     }
   }, [player, deviceId, songUri, token, playerReady]);
 
+  
   // Handle play/pause
   const togglePlay = () => {
     if (!player) {
@@ -269,15 +274,15 @@ const SpotifyPlayer = ({ token, songUri, songData }) => {
 
   // Handle next track
   const nextTrack = () => {
-    if (!player) {
-      console.log("Can't skip track: player not initialized");
-      return;
+    if (!player) return;
+    // remove from playlist first:
+    if (onTrackEnd) {
+      console.log('Skip pressed, removing current song…');
+      onTrackEnd(songData.id);
     }
-    
-    console.log("Skipping to next track");
     player.nextTrack()
-      .then(() => console.log("Skipped to next track"))
-      .catch(err => console.error("Error skipping track:", err));
+      .then(() => console.log('Skipped to next track'))
+      .catch(err => console.error('Error skipping:', err));
   };
 
   // Handle volume change
@@ -370,6 +375,7 @@ const SpotifyPlayer = ({ token, songUri, songData }) => {
         duration={duration}
         onSeek={handleSeek}
         formatTime={formatTime}
+        isActive={playerReady} 
       />
     </>
   );

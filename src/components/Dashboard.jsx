@@ -5,6 +5,7 @@ import FlipMove from 'react-flip-move';
 import { MdPersonAddAlt1 } from "react-icons/md";
 import { PiMusicNotesPlusFill } from "react-icons/pi";
 import { db } from '../Firebase/firebaseConfig';
+import { removeSongFromPlaylist } from '../Firebase/playlist';
 import AddSongForm from './AddSongForm';
 import AddUserForm from './AddUserForm';
 import CreatePlaylistModal from './CreatePlaylistModal';
@@ -248,31 +249,27 @@ const Dashboard = ({ user }) => {
       </div>
 
       {/* Spotify Player - only owner can control music */}
-      {selectedPlaylist && (
-        <>
-          {selectedPlaylist.ownerId === user.uid ? (
-            // Owner view - show player if they're connected to Spotify
-            spotifyToken ? (
-              <SpotifyPlayer 
-                token={spotifyToken}
-                songUri={songs.length > 0 && songs[0].spotifyUri ? songs[0].spotifyUri : null}
-                songData={songs.length > 0 ? songs[0] : { image: '', songTitle: '', artist: '', user: '' }}
-              />
-            ) : (
-              // Owner needs to connect to Spotify
-              <div className="fixed bottom-0 left-0 right-0 bg-white text-black px-6 py-4 flex items-center justify-center z-50 border-t shadow-md" 
-                style={{ backgroundColor: '#a7b8ff' }}>
-                <p>Please connect your Spotify account in your Profile to control music.</p>
-              </div>
-            )
+      {selectedPlaylist && songs.length > 0 && (
+        selectedPlaylist.ownerId === user.uid ? (
+          spotifyToken ? (
+            <SpotifyPlayer
+              token={spotifyToken}
+              songUri={songs[0].spotifyUri}
+              songData={songs[0]}
+              onTrackEnd={songId =>
+                removeSongFromPlaylist(selectedPlaylist.id, songId)
+              }
+            />
           ) : (
-            // Non-owner view - show message that only owner can control
-            <div className="fixed bottom-0 left-0 right-0 bg-white text-black px-6 py-4 flex items-center justify-center z-50 border-t shadow-md" 
-              style={{ backgroundColor: '#a7b8ff' }}>
-              <p>Only the playlist owner can control music.</p>
+            <div className="fixed bottom-0 …">
+              <p>Please connect your Spotify account in your Profile to control music.</p>
             </div>
-          )}
-        </>
+          )
+        ) : (
+          <div className="fixed bottom-0 …">
+            <p>Only the playlist owner can control music.</p>
+          </div>
+        )
       )}
 
       {showAddSongForm && selectedPlaylist && (
