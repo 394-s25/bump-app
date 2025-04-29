@@ -58,7 +58,7 @@ const Dashboard = ({ user }) => {
       bg-lightBeige dark:bg-darkBg
       text-gray-900    dark:text-darkText
     ">
-      <header className="flex items-center mb-6">
+      <header className="flex flex-wrap items-center mb-6">
         <div className="text-2xl font-extrabold text-blue-300 dark:text-blue-400">
           {selectedPlaylist ? selectedPlaylist.name : 'Select a Playlist →'}
         </div>
@@ -70,36 +70,39 @@ const Dashboard = ({ user }) => {
           onSelectPlaylist={handleSelectPlaylist}
           onOpenChange={setDropdownOpen}
         />
+
+        {selectedPlaylist && (
+          <>
+            <div className="flex flex-row items-center space-x-4">
+              <button
+                disabled={dropdownOpen}
+                onClick={() => setShowAddSongForm(true)}
+                className="
+                  inline-flex items-center justify-center w-10 h-10 rounded-full border shadow-sm
+                  bg-blue-300 text-white hover:bg-blue-400 focus:outline-none
+                  dark:bg-blue-600 dark:hover:bg-blue-700 dark:border-gray-600
+                "
+                aria-label="Add song"
+              >
+                <PiMusicNotesPlusFill />
+              </button>
+
+              <button
+                onClick={() => setShowAddUserForm(true)}
+                className="
+                  inline-flex items-center justify-center w-10 h-10 rounded-full border shadow-sm
+                  bg-blue-300 text-white hover:bg-blue-400 focus:outline-none
+                  dark:bg-blue-600 dark:hover:bg-blue-700 dark:border-gray-600
+                "
+                aria-label="Add user"
+              >
+                <MdPersonAddAlt1 />
+              </button>
+            </div>
+          </>
+        )}
+
       </header>
-
-      {selectedPlaylist && (
-        <div className="flex space-x-4 mb-6">
-          <button
-            disabled={dropdownOpen}
-            onClick={() => setShowAddSongForm(true)}
-            className="
-              inline-flex items-center justify-center w-10 h-10 rounded-full border shadow-sm
-              bg-blue-300 text-white hover:bg-blue-400 focus:outline-none
-              dark:bg-blue-600 dark:hover:bg-blue-700 dark:border-gray-600
-            "
-            aria-label="Add song"
-          >
-            <PiMusicNotesPlusFill />
-          </button>
-
-          <button
-            onClick={() => setShowAddUserForm(true)}
-            className="
-              inline-flex items-center justify-center w-10 h-10 rounded-full border shadow-sm
-              bg-blue-300 text-white hover:bg-blue-400 focus:outline-none
-              dark:bg-blue-600 dark:hover:bg-blue-700 dark:border-gray-600
-            "
-            aria-label="Add user"
-          >
-            <MdPersonAddAlt1 />
-          </button>
-        </div>
-      )}
 
       {notice && (
         <div className="
