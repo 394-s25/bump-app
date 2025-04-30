@@ -27,6 +27,47 @@ const Dashboard = ({ user }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [notice, setNotice] = useState('');
 
+  const debug = {
+    logPermissions: async () => {
+      if (!selectedPlaylist) {
+        console.log("No playlist selected");
+        return;
+      }
+      
+      if (!user) {
+        console.log("No user logged in");
+        return;
+      }
+      
+      try {
+        const playlistRef = doc(db, "playlists", selectedPlaylist.id);
+        const playlistSnap = await getDoc(playlistRef);
+        
+        if (!playlistSnap.exists()) {
+          console.log("Playlist doesn't exist");
+          return;
+        }
+        
+        const playlistData = playlistSnap.data();
+        
+        console.log("Playlist permissions check:");
+        console.log("- Current user ID:", user.uid);
+        console.log("- Playlist owner ID:", playlistData.ownerId);
+        console.log("- Is owner?", playlistData.ownerId === user.uid);
+        console.log("- Shared with:", playlistData.sharedWith || []);
+        console.log("- Is in shared list?", playlistData.sharedWith?.includes(user.uid));
+        // console.log("- Is public?", playlistData.isPublic === true);
+        
+        const canModify = playlistData.ownerId === user.uid || 
+                         playlistData.sharedWith?.includes(user.uid);
+        console.log("- Can modify playlist?", canModify);
+        
+      } catch (error) {
+        console.error("Error checking permissions:", error);
+      }
+    }
+  };
+
   // Test function to verify the token works and debug Spotify SDK issues
   const testSpotify = async () => {
     if (!spotifyToken) {
