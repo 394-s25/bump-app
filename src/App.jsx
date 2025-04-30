@@ -11,7 +11,7 @@ import SpotifyCallback from './components/SpotifyCallback';
 
 // Define API URL based on environment
 const API_URL = window.location.hostname === 'bump-8dc73.web.app'
-  ? 'https://YOUR_CLOUD_RUN_SERVICE_URL' // Replace with your actual Cloud Run URL after deployment
+  ? 'https://bump-app-416502417253.us-central1.run.app/' // Replace with your actual Cloud Run URL after deployment
   : 'http://127.0.0.1:5000';
 
 // Define redirect URI based on environment

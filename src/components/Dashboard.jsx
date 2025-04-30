@@ -1,4 +1,5 @@
-import { collection, doc, getDoc, onSnapshot, orderBy, query } from 'firebase/firestore';
+// src/components/Dashboard.jsx
+import { collection, onSnapshot, orderBy, query } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
 import FlipMove from 'react-flip-move';
 import { MdPersonAddAlt1 } from "react-icons/md";
@@ -10,8 +11,8 @@ import AddUserForm from './AddUserForm';
 import CreatePlaylistModal from './CreatePlaylistModal';
 import PlaylistDropdown from './PlaylistDropdown';
 import SongItem from './SongItem';
-import SpotifyLogin from './SpotifyLogin';
-import SpotifyPlayer from './SpotifyPlayer';
+import SpotifyLogin from './SpotifyLogin'; // New import for login component
+import SpotifyPlayer from './SpotifyPlayer'; // Changed from MusicPlayer to SpotifyPlayer
 
 const Dashboard = ({ user }) => {
   const [selectedPlaylist, setSelectedPlaylist] = useState(null);
@@ -19,11 +20,12 @@ const Dashboard = ({ user }) => {
   const [showAddSongForm, setShowAddSongForm] = useState(false);
   const [showAddUserForm, setShowAddUserForm] = useState(false);
   const [spotifyToken, setSpotifyToken] = useState(null);
-  const [showCreatePlaylistModal, setShowCreatePlaylistModal] = useState(false);
+
+  const [showCreatePlaylistModal, setShowCreatePlaylistModal] =
+    useState(false);
   const [dropdownRefreshKey, setDropdownRefreshKey] = useState(0);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [notice, setNotice] = useState('');
-  const [processingRemoval, setProcessingRemoval] = useState(false);
 
   const debug = {
     logPermissions: async () => {
@@ -65,31 +67,40 @@ const Dashboard = ({ user }) => {
       }
     }
   };
+
   // Test function to verify the token works and debug Spotify SDK issues
   const testSpotify = async () => {
     if (!spotifyToken) {
       alert("No Spotify token available");
       return;
     }
+    
     try {
       console.log("Testing Spotify token:", spotifyToken.substring(0, 10) + "...");
+      
       const response = await fetch('https://api.spotify.com/v1/me', {
-        headers: { 'Authorization': `Bearer ${spotifyToken}` }
+        headers: {
+          'Authorization': `Bearer ${spotifyToken}`
+        }
       });
+      
       console.log("Spotify API response status:", response.status);
+      
       if (!response.ok) {
         const errorText = await response.text();
         console.error("Spotify API error response:", errorText);
         throw new Error(`HTTP error ${response.status}`);
       }
+      
       const data = await response.json();
       console.log("Spotify user data:", data);
       alert(`Spotify API connection working! Hello, ${data.display_name || 'User'}`);
       
-      // Check song data
-      if (songs.length > 0) {
-        console.log("Top song data:", songs[0]);
-        console.log("Top song has URI:", !!songs[0].spotifyUri);
+      // Check player details
+      if (songs.length > 0 && songs[0].spotifyUri) {
+        console.log("Top song URI available:", songs[0].spotifyUri);
+      } else {
+        console.log("No song URI available in top song");
       }
     } catch (error) {
       console.error("Spotify API test error:", error);
@@ -98,20 +109,15 @@ const Dashboard = ({ user }) => {
   };
 
   useEffect(() => {
-    console.log(selectedPlaylist);
+    console.log(selectedPlaylist)
   }, [selectedPlaylist]);
-
-  // Debug song data when it loads or changes
-  useEffect(() => {
-    if (songs.length > 0) {
-      console.log(`Loaded ${songs.length} songs, top song:`, songs[0]);
-    }
-  }, [songs]);
 
   // Check for Spotify token in localStorage on component mount
   useEffect(() => {
     const token = localStorage.getItem('spotify_access_token');
-    if (token) setSpotifyToken(token);
+    if (token) {
+      setSpotifyToken(token);
+    }
   }, []);
 
   /** realtime songs */
@@ -129,25 +135,32 @@ const Dashboard = ({ user }) => {
     return unsub;
   }, [selectedPlaylist]);
 
-  // Token expiry checker
   useEffect(() => {
+    // Check if token needs refreshing
     const checkTokenExpiry = () => {
       const expiry = localStorage.getItem('spotify_token_expiry');
       if (!expiry || !spotifyToken) return;
-      if (Date.now() > parseInt(expiry) - 5 * 60 * 1000) {
+      
+      // If token is expired or about to expire, we need to re-authenticate
+      if (Date.now() > parseInt(expiry) - (5 * 60 * 1000)) {
+        // Replace setStatus with setNotice since that's what's defined in this component
         setNotice('Spotify session expired. Please reconnect.');
         setSpotifyToken(null);
         localStorage.removeItem('spotify_access_token');
         localStorage.removeItem('spotify_token_expiry');
       }
     };
+    
+    // Check on component mount and every minute
     checkTokenExpiry();
     const interval = setInterval(checkTokenExpiry, 60 * 1000);
+    
     return () => clearInterval(interval);
   }, [spotifyToken]);
-
-  // Detect token changes from other tabs/components
+  
+  // Add another useEffect to detect token changes in localStorage
   useEffect(() => {
+    // This will help detect when the token is added by AuthHandlerWithRouter
     const handleStorageChange = () => {
       const token = localStorage.getItem('spotify_access_token');
       if (token && token !== spotifyToken) {
@@ -155,7 +168,11 @@ const Dashboard = ({ user }) => {
         setSpotifyToken(token);
       }
     };
+    
+    // Check immediately and also add a listener
     handleStorageChange();
+    
+    // Listen for storage events (changes from other tabs/components)
     window.addEventListener('storage', handleStorageChange);
     return () => window.removeEventListener('storage', handleStorageChange);
   }, [spotifyToken]);
@@ -173,60 +190,19 @@ const Dashboard = ({ user }) => {
   };
 
   // Handle successful Spotify login
-  const handleSpotifyLogin = token => {
+  const handleSpotifyLogin = (token) => {
     setSpotifyToken(token);
     localStorage.setItem('spotify_access_token', token);
   };
 
-  // Enhanced song completion handler with debouncing
-  const handleSongComplete = async (songId) => {
-    if (!selectedPlaylist || processingRemoval) return false;
-    
-    try {
-      setProcessingRemoval(true);
-      console.log(`Removing completed song ${songId} from playlist ${selectedPlaylist.id}`);
-      
-      await removeSongFromPlaylist(selectedPlaylist.id, songId);
-      console.log("Song removed successfully, Firebase should auto-update");
-      
-      // Set a brief timeout to prevent multiple rapid removals
-      setTimeout(() => {
-        setProcessingRemoval(false);
-      }, 2000);
-      
-      return true;
-    } catch (error) {
-      console.error("Error removing completed song:", error);
-      setNotice("Error removing song after completion");
-      setProcessingRemoval(false);
-      return false;
-    }
-  };
-
-  // Utility to check song URIs
-  const checkSongURIs = () => {
-    if (songs.length === 0) {
-      alert("No songs in playlist");
-      return;
-    }
-    
-    const songsWithoutUri = songs.filter(song => !song.spotifyUri);
-    if (songsWithoutUri.length === 0) {
-      alert("All songs have proper Spotify URIs!");
-    } else {
-      alert(`Found ${songsWithoutUri.length} songs without Spotify URIs. Please re-add these songs.`);
-      console.table(songsWithoutUri.map(s => ({
-        title: s.songTitle,
-        artist: s.artist,
-        user: s.user
-      })));
-    }
-  };
-
   return (
-    <div className="bg-lightBeige min-h-screen p-4" style={{ backgroundColor: '#fff7d5' }}>
+    <div
+      className="bg-lightBeige min-h-screen p-4"
+      style={{ backgroundColor: '#fff7d5' }}
+    >
       <header className="flex flex-row items-center mb-6">
-        <div className="text-2xl font-extrabold" style={{ color: '#a7b8ff' }}>
+        <div className="text-2xl font-extrabold"
+            style={{ color: '#a7b8ff'}}>
           {selectedPlaylist ? selectedPlaylist.name : 'Select a Playlist →'}
         </div>
         <PlaylistDropdown
@@ -237,56 +213,58 @@ const Dashboard = ({ user }) => {
           onOpenChange={setDropdownOpen}
         />
         {selectedPlaylist && (
-          <>
+        <>
+          <div className="flex justify-center m-4">
             <button
               disabled={dropdownOpen}
-              className={`m-4 w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center ${
-                dropdownOpen ? 'opacity-50 cursor-not-allowed' : ''
+              className={`inline-flex items-center justify-center w-10 h-10 rounded-full border border-gray-300 shadow-sm bg-white text-gray-700 hover:bg-gray-100 focus:outline-none ${
+                dropdownOpen
+                  ? 'bg-blue-300 cursor-not-allowed'
+                  : 'bg-blue-500 hover:bg-blue-600'
               }`}
-              style={{ backgroundColor: '#a7b8ff' }}
+              style={{
+                backgroundColor: '#a7b8ff',
+                color: "white",
+              }}
               onClick={() => setShowAddSongForm(true)}
             >
               <PiMusicNotesPlusFill />
             </button>
+          </div>
+
+          <div className="flex justify-center m-4">
             <button
-              className="m-4 w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center"
-              style={{ backgroundColor: '#a7b8ff' }}
+              className="inline-flex items-center justify-center w-10 h-10 rounded-full border border-gray-300 shadow-sm bg-white text-gray-700 hover:bg-gray-100 focus:outline-none"
               onClick={() => setShowAddUserForm(true)}
+              style={{
+                backgroundColor: '#a7b8ff',
+                color: "white",
+              }}
             >
               <MdPersonAddAlt1 />
             </button>
-          </>
-        )}
-        {!spotifyToken && (
-          <div className="m-4">
-            <SpotifyLogin onLogin={handleSpotifyLogin} />
           </div>
-        )}
-        {spotifyToken && (
-          <>
-            <button
-              onClick={testSpotify}
-              className="m-4 px-4 py-2 rounded-full text-white"
-              style={{ backgroundColor: '#4CAF50' }}
-            >
-              Test Spotify Connection
-            </button>
-            <button
-              onClick={checkSongURIs}
-              className="m-4 px-4 py-2 rounded-full text-white"
-              style={{ backgroundColor: '#FFA500' }}
-            >
-              Check Song URIs
-            </button>
-            <button
-              onClick={debug.logPermissions}
-              className="m-4 px-4 py-2 rounded-full text-white"
-              style={{ backgroundColor: '#FF5722' }}
-            >
-              Check Permissions
-            </button>
-          </>
-        )}
+        </>
+      )}
+
+      {!spotifyToken && (
+        <div className="flex justify-center m-4">
+          <SpotifyLogin onLogin={handleSpotifyLogin} />
+        </div>
+      )}
+      
+      {/* Add the debug button when spotify token is available */}
+      {spotifyToken && (
+        <div className="flex justify-center m-4">
+          <button 
+            onClick={testSpotify}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors"
+            style={{ backgroundColor: '#4CAF50' }}
+          >
+            Test Spotify Connection
+          </button>
+        </div>
+      )}
       </header>
 
       {notice && (
@@ -294,14 +272,14 @@ const Dashboard = ({ user }) => {
           {notice}
         </div>
       )}
-
+      
       <div className="space-y-4 pb-20">
         <FlipMove>
           {songs.map((song, idx) => (
             <div key={song.id}>
               <SongItem
                 user={user}
-                playlistId={selectedPlaylist?.id || ''}
+                playlistId={selectedPlaylist ? selectedPlaylist.id : ''}
                 song={song}
                 isCurrent={idx === 0}
                 onVote={() => {}}
@@ -309,30 +287,30 @@ const Dashboard = ({ user }) => {
             </div>
           ))}
         </FlipMove>
-        
-        {songs.length === 0 && selectedPlaylist && (
-          <div className="text-center p-6 bg-white rounded-lg shadow-sm">
-            <p className="text-gray-500">No songs in this playlist. Add songs to get started!</p>
-          </div>
-        )}
       </div>
 
-      {(spotifyToken || (songs.length > 0 && songs[0]?.spotifyUri)) ? (
-        <SpotifyPlayer
-          token={spotifyToken}
-          songUri={songs.length > 0 && songs[0]?.spotifyUri ? songs[0].spotifyUri : null}
-          songData={songs.length > 0 ? songs[0] : { image: '', songTitle: '', artist: '', user: '' }}
-          playlistId={selectedPlaylist?.id}
-          songs={songs}
-          onSongComplete={handleSongComplete}
-        />
-      ) : (
-        <div
-          className="fixed bottom-0 left-0 right-0 px-6 py-4 flex items-center justify-center z-50 border-t shadow-md"
-          style={{ backgroundColor: '#a7b8ff', color: '#000' }}
-        >
-          <p>Please connect Spotify to enable playback</p>
-        </div>
+      {/* Spotify Player - only owner can control music */}
+      {selectedPlaylist && songs.length > 0 && (
+        selectedPlaylist.ownerId === user.uid ? (
+          spotifyToken ? (
+            <SpotifyPlayer
+              token={spotifyToken}
+              songUri={songs[0].spotifyUri}
+              songData={songs[0]}
+              onTrackEnd={songId =>
+                removeSongFromPlaylist(selectedPlaylist.id, songId)
+              }
+            />
+          ) : (
+            <div className="fixed bottom-0 …">
+              <p>Please connect your Spotify account in your Profile to control music.</p>
+            </div>
+          )
+        ) : (
+          <div className="fixed bottom-0 …">
+            <p>Only the playlist owner can control music.</p>
+          </div>
+        )
       )}
 
       {showAddSongForm && selectedPlaylist && (
@@ -350,8 +328,8 @@ const Dashboard = ({ user }) => {
           playlistId={selectedPlaylist.id}
           onClose={() => setShowAddUserForm(false)}
           onAddUser={() => setShowAddUserForm(false)}
-        />
-      )}
+          />
+        )}
 
       {showCreatePlaylistModal && (
         <CreatePlaylistModal

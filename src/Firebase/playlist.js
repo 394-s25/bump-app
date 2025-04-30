@@ -8,7 +8,6 @@ import {
   query,
   runTransaction,
   serverTimestamp,
-  setDoc,
   updateDoc,
   where
 } from 'firebase/firestore';
@@ -289,45 +288,6 @@ export async function getPlaybackState(playlistId) {
   } catch (error) {
     console.error("Error getting playback state:", error);
     return null;
-  }
-}
-
-/**
- * Set up or update the playback state for a playlist
- */
-export async function updatePlaybackState(playlistId, playbackData) {
-  try {
-    console.log(`Updating playback state for playlist ${playlistId}`, playbackData);
-    const playbackRef = doc(db, "playlists", playlistId, "playback_state", "current");
-    await setDoc(playbackRef, {
-      ...playbackData,
-      updatedAt: serverTimestamp()
-    }, { merge: true });
-    return true;
-  } catch (error) {
-    console.error("Error updating playback state:", error);
-    throw error;
-  }
-}
-
-/**
- * Check if user can modify a playlist
- */
-export async function canUserModifyPlaylist(playlistId, userId) {
-  try {
-    const playlistRef = doc(db, "playlists", playlistId);
-    const snapshot = await getDoc(playlistRef);
-    
-    if (!snapshot.exists()) return false;
-    
-    const playlist = snapshot.data();
-    return (
-      playlist.ownerId === userId || 
-      (playlist.sharedWith && playlist.sharedWith.includes(userId))
-    );
-  } catch (error) {
-    console.error("Error checking user permissions:", error);
-    return false;
   }
 }
 
