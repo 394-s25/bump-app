@@ -13,7 +13,7 @@ const SongSearchItem = ({ track }) => {
 
   return (
     <div
-      style={{ backgroundColor: '#fdf9e9', cursor: 'pointer' }}
+      style={{ backgroundColor: '#a7b8ff', cursor: 'pointer' }}
       className="flex items-center justify-between p-4 rounded-lg shadow-md border bg-white border-gray-200 text-black"
     >
       <div className="flex items-center gap-3">
