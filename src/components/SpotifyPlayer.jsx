@@ -19,7 +19,7 @@ const loadSpotifyScript = () => {
   document.body.appendChild(script);
 };
 
-const SpotifyPlayer = ({ token, songUri, songData, onTrackEnd }) => {
+const SpotifyPlayer = ({ token, songUri, songData, onTrackEnd, isEmpty = false }) => {
   const [player, setPlayer] = useState(null);
   const [deviceId, setDeviceId] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -51,6 +51,7 @@ const SpotifyPlayer = ({ token, songUri, songData, onTrackEnd }) => {
       setLoadingState('sdk-ready');
       
       try {
+        console.log("Creating Spotify Player instance");
         const player = new window.Spotify.Player({
           name: 'Bump App Web Player',
           getOAuthToken: cb => { 
@@ -170,6 +171,12 @@ const SpotifyPlayer = ({ token, songUri, songData, onTrackEnd }) => {
   // Play song when songUri changes with enhanced logging and error handling
   useEffect(() => {
     const playSong = async () => {
+
+      if (isEmpty) {
+        console.log("Queue is empty, not attempting to play");
+        return;
+      }
+
       // Log the state of all required components
       console.log("Play song called with state:", { 
         playerExists: !!player,
@@ -244,11 +251,11 @@ const SpotifyPlayer = ({ token, songUri, songData, onTrackEnd }) => {
       }
     };
     
-    // Only attempt to play if we have all required pieces
-    if (player && deviceId && songUri && playerReady) {
+     // Only attempt to play if we have all required pieces AND we're not in empty state
+    if (player && deviceId && songUri && playerReady && !isEmpty) {
       playSong();
     }
-  }, [player, deviceId, songUri, token, playerReady]);
+  }, [player, deviceId, songUri, token, playerReady, isEmpty]);
 
   
   // Handle play/pause
@@ -361,6 +368,17 @@ const SpotifyPlayer = ({ token, songUri, songData, onTrackEnd }) => {
     </div>
   ) : null;
 
+  if (isEmpty) {
+    return (
+      <div className="fixed bottom-0 left-0 right-0 bg-white text-black px-6 py-4 flex items-center justify-between z-50 border-t shadow-md" style={{ backgroundColor: '#a7b8ff' }}>
+        <div className="text-center w-full">
+          <p className="text-white font-medium">Add songs to your queue to start playing</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Otherwise render the normal player
   return (
     <>
       {errorDisplay}

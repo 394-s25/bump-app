@@ -78,11 +78,13 @@ const PlaylistDropdown = ({
       try {
         const owned  = await getUserPlaylists(user.uid);
         const shared = await getSharedPlaylists(user.uid);
-        const pub    = await getPublicPlaylists();
+
+
+        // const pub = await getPublicPlaylists();
         const combined = [
           ...owned,
           ...shared,
-          ...pub.filter((pl) => pl.ownerId !== user.uid),
+          // ...pub.filter((pl) => pl.ownerId !== user.uid),
         ];
         const unique = Array.from(
           new Map(combined.map((pl) => [pl.id, pl])).values()
@@ -136,11 +138,11 @@ const PlaylistDropdown = ({
                 <div className="flex justify-between">
                   <span>{pl.name}</span>
                   <span className="text-xs text-gray-500 dark:text-gray-400">
-                    {pl.isPublic
-                      ? 'Public'
-                      : pl.ownerId === user.uid
+                    {
+                      pl.ownerId === user.uid
                       ? 'by you'
-                      : `by ${ownerUsernames[pl.ownerId] || '...'}`}
+                      : `by ${ownerUsernames[pl.ownerId] || '...'}`
+                    }
                   </span>
                 </div>
               </button>
