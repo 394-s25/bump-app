@@ -75,8 +75,8 @@ const SongItem = ({ user, playlistId, song, onVote, isCurrent }) => {
 
   return (
     <div
-      style={{ backgroundColor: '#fdf9e9' }}
-      className={`flex items-center justify-between p-4 rounded-lg shadow-md border bg-white ${
+      // style={{ backgroundColor: '#fdf9e9 dark:#2C3A4D' }} 
+      className={`flex items-center justify-between p-4 rounded-lg shadow-md border bg-lightBeige2 dark:bg-darkBg2 ${
         isCurrent ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200'
       }`}
     >
@@ -87,10 +87,10 @@ const SongItem = ({ user, playlistId, song, onVote, isCurrent }) => {
           className="w-12 h-12 rounded object-cover"
         />
         <div>
-          <p className="font-semibold text-sm">
+          <p className="font-semibold text-sm dark:text-white">
             {song.songTitle} - {song.artist}
           </p>
-          <p className="text-gray-500 text-xs">
+          <p className="text-gray-500 dark:text-blue-300 text-xs">
             User: {song.user ? song.user : placeholderUser}
           </p>
         </div>

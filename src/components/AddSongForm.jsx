@@ -93,10 +93,11 @@ const AddSongForm = ({ onClose, onAddSong, user, playlistId }) => {
         background: 'white', padding: '20px', borderRadius: '8px',
         width: '400px', maxWidth: '90%'
       }}>
-        <h2>Add a Song</h2>
+        <h2 className='text-black'>Add a Song</h2>
         {!selectedSong ? (
           <div style={{ marginBottom: '15px' }}>
             <input
+              className='text-black'
               type="text"
               placeholder="Search for songs..."
               value={query}
@@ -107,23 +108,23 @@ const AddSongForm = ({ onClose, onAddSong, user, playlistId }) => {
               <div style={{ marginTop: '10px', maxHeight: '200px', overflowY: 'auto' }}>
                 {searchResults.map((track, index) => (
                   <div key={track.spotify_url || index} onClick={() => handleSongSelect(track)} style={{ cursor: 'pointer' }}>
-                    <SongSearchItem track={track} />
+                    <SongSearchItem track={track}/>
                   </div>
                 ))}
               </div>
             )}
           </div>
         ) : (
-          <div style={{ marginBottom: '15px' }}>
+          <div style={{ marginBottom: '15px' }} className='text-black'>
             <p>Selected Song:</p>
             <SongSearchItem track={selectedSong} />
           </div>
         )}
         <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-          <button onClick={onClose} style={{ marginRight: '10px', padding: '8px 16px' }}>
+          <button className='text-black' onClick={onClose} style={{ marginRight: '10px', padding: '8px 16px' }}>
             Cancel
           </button>
-          <button onClick={handleAdd} style={{ padding: '8px 16px' }}>
+          <button className='text-black' onClick={handleAdd} style={{ padding: '8px 16px' }}>
             Add
           </button>
         </div>

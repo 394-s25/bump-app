@@ -1,9 +1,10 @@
-// // src/components/Dashboard.jsx
+ // src/components/Dashboard.jsx
 import { collection, onSnapshot, orderBy, query } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
+import { collection, onSnapshot, orderBy, query } from 'firebase/firestore';
 import FlipMove from 'react-flip-move';
-import { MdPersonAddAlt1 } from "react-icons/md";
-import { PiMusicNotesPlusFill } from "react-icons/pi";
+import { MdPersonAddAlt1 } from 'react-icons/md';
+import { PiMusicNotesPlusFill } from 'react-icons/pi';
 import { db } from '../Firebase/firebaseConfig';
 import { removeSongFromPlaylist } from '../Firebase/playlist';
 import AddSongForm from './AddSongForm';
@@ -13,6 +14,7 @@ import PlaylistDropdown from './PlaylistDropdown';
 import SongItem from './SongItem';
 import SpotifyLogin from './SpotifyLogin';
 import SpotifyPlayer from './SpotifyPlayer';
+
 
 const Dashboard = ({ user }) => {
   const [selectedPlaylist, setSelectedPlaylist] = useState(null);
@@ -141,6 +143,7 @@ const Dashboard = ({ user }) => {
     return unsub;
   }, [selectedPlaylist]);
 
+
   // Token expiry check
   useEffect(() => {
     const checkTokenExpiry = () => {
@@ -191,11 +194,17 @@ const Dashboard = ({ user }) => {
   };
 
   return (
-    <div className="bg-lightBeige min-h-screen p-4" style={{ backgroundColor: '#fff7d5' }}>
-      <header className="flex flex-row items-center mb-6">
-        <div className="text-2xl font-extrabold" style={{ color: '#a7b8ff' }}>
+    <div className="
+      min-h-screen p-4
+      bg-lightBeige dark:bg-darkBg
+      text-gray-900    dark:text-darkText
+    ">
+      <header className="flex flex-wrap items-center mb-6">
+        <div className="text-2xl font-extrabold text-blue-300 dark:text-blue-400">
+
           {selectedPlaylist ? selectedPlaylist.name : 'Select a Playlist →'}
         </div>
+
         <PlaylistDropdown
           key={dropdownRefreshKey}
           user={user}
@@ -203,51 +212,70 @@ const Dashboard = ({ user }) => {
           onSelectPlaylist={handleSelectPlaylist}
           onOpenChange={setDropdownOpen}
         />
+
         {selectedPlaylist && (
           <>
-            <button
-              disabled={dropdownOpen}
-              className={`inline-flex items-center justify-center w-10 h-10 m-4 rounded-full border shadow-sm ${
-                dropdownOpen ? 'bg-blue-300 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600'
-              }`}
-              style={{ backgroundColor: '#a7b8ff', color: 'white' }}
-              onClick={() => setShowAddSongForm(true)}
-            >
-              <PiMusicNotesPlusFill />
-            </button>
-            <button
-              className="inline-flex items-center justify-center w-10 h-10 m-4 rounded-full border shadow-sm bg-white text-gray-700 hover:bg-gray-100"
-              style={{ backgroundColor: '#a7b8ff', color: 'white' }}
-              onClick={() => setShowAddUserForm(true)}
-            >
-              <MdPersonAddAlt1 />
-            </button>
+            <div className="flex flex-row items-center space-x-4">
+              <button
+                disabled={dropdownOpen}
+                onClick={() => setShowAddSongForm(true)}
+                className="
+                  inline-flex items-center justify-center w-10 h-10 rounded-full border shadow-sm
+                  bg-blue-300 text-white hover:bg-blue-400 focus:outline-none
+                  dark:bg-blue-600 dark:hover:bg-blue-700 dark:border-gray-600
+                "
+                aria-label="Add song"
+              >
+                <PiMusicNotesPlusFill />
+              </button>
+
+              <button
+                onClick={() => setShowAddUserForm(true)}
+                className="
+                  inline-flex items-center justify-center w-10 h-10 rounded-full border shadow-sm
+                  bg-blue-300 text-white hover:bg-blue-400 focus:outline-none
+                  dark:bg-blue-600 dark:hover:bg-blue-700 dark:border-gray-600
+                "
+                aria-label="Add user"
+              >
+                <MdPersonAddAlt1 />
+              </button>
+            </div>
           </>
         )}
-        {!spotifyToken && (
-          <div className="m-4">
-            <SpotifyLogin onLogin={handleSpotifyLogin} />
-          </div>
-        )}
-        {spotifyToken && (
-          <div className="m-4">
-            <button
-              onClick={testSpotify}
-              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-full hover:bg-green-700"
-            >
-              Test Spotify Connection
-            </button>
-          </div>
-        )}
+
+      {!spotifyToken && (
+        <div className="flex justify-center m-4">
+          <SpotifyLogin onLogin={handleSpotifyLogin} />
+        </div>
+      )}
+      
+      {/* Add the debug button when spotify token is available */}
+      {spotifyToken && (
+        <div className="flex justify-center m-4">
+          <button 
+            onClick={testSpotify}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors"
+            style={{ backgroundColor: '#4CAF50' }}
+          >
+            Test Spotify Connection
+          </button>
+        </div>
+      )}
       </header>
 
       {notice && (
-        <div className="mb-4 px-4 py-2 text-sm text-center text-white bg-red-500 rounded">
+        <div className="
+          mb-4 px-4 py-2 text-sm text-white
+          bg-red-500 dark:bg-red-600
+          rounded
+        ">
           {notice}
         </div>
       )}
 
       {/* Up Next */}
+
       <div className="space-y-4 pb-20">
         <FlipMove>
           {songs
