@@ -268,7 +268,7 @@ const Dashboard = ({ user }) => {
       )}
       
       {/* Add the debug button when spotify token is available */}
-      {spotifyToken && (
+      {/* {spotifyToken && (
         <div className="flex justify-center m-4">
           <button 
             onClick={testSpotify}
@@ -278,7 +278,7 @@ const Dashboard = ({ user }) => {
             Test Spotify Connection
           </button>
         </div>
-      )}
+      )} */}
       </header>
 
       {notice && (
