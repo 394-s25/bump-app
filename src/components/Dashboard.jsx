@@ -325,7 +325,7 @@ const Dashboard = ({ user }) => {
           No songs in queue.
         </div>
       ) :  !spotifyToken?(
-        <div className="fixed bottom-0 left-0 right-0 p-4 bg-yellow-100 text-center">
+        <div className="fixed bottom-0 left-0 right-0 p-4 bg-yellow-100 dark:text-gray-800 text-center">
           Please connect your Spotify account in your Profile to control music.
         </div>
       ) : selectedPlaylist ? (
