@@ -1,7 +1,6 @@
  // src/components/Dashboard.jsx
 import { collection, onSnapshot, orderBy, query } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
-import { collection, onSnapshot, orderBy, query } from 'firebase/firestore';
 import FlipMove from 'react-flip-move';
 import { MdPersonAddAlt1 } from 'react-icons/md';
 import { PiMusicNotesPlusFill } from 'react-icons/pi';
