@@ -101,19 +101,34 @@ const Dashboard = ({ user }) => {
 
   // Initialize or clear currentSong when songs change
   useEffect(() => {
-    if (!currentSong && songs.length > 0) {
-      setCurrentSong(songs[0]);
-    }
-    if (songs.length === 0 && currentSong) {
+    if (songs.length > 0) {
+      // if no currentSong, or currentSong was just removed, pick the first
+      const stillThere = currentSong && songs.some(s => s.id === currentSong.id);
+      if (!currentSong || !stillThere) {
+        setCurrentSong(songs[0]);
+      }
+    } else {
+      // empty list → clear
       setCurrentSong(null);
     }
-  }, [songs, currentSong]);
+  }, [songs]);
 
   // Remove finished or skipped track and advance
   const handleTrackEnd = async (songId) => {
-    await removeSongFromPlaylist(selectedPlaylist.id, songId);
-    const remaining = songs.filter(s => s.id !== songId);
-    setCurrentSong(remaining[0] || null);
+    if (!selectedPlaylist || !songId) {
+      console.log("Cannot remove song: missing playlist or song ID");
+      return;
+    }
+    
+    try {
+      await removeSongFromPlaylist(selectedPlaylist.id, songId);
+      // Get fresh songs data after removal
+      const remaining = songs.filter(s => s.id !== songId);
+      console.log("Songs remaining after removal:", remaining.length);
+      setCurrentSong(remaining[0] || null);
+    } catch (error) {
+      console.error("Error handling track end:", error);
+    }
   };
 
   // Debug selectedPlaylist
