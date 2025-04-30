@@ -306,15 +306,15 @@ const Dashboard = ({ user }) => {
         <div className="fixed bottom-0 left-0 right-0 p-4 bg-gray-100 text-center">
           No songs in queue.
         </div>
-      ) : selectedPlaylist ? (
-        <div className="fixed bottom-0 left-0 right-0 p-4 bg-yellow-100 text-center">
-          Only the playlist owner can control music.
-        </div>
       ) :  !spotifyToken?(
         <div className="fixed bottom-0 left-0 right-0 p-4 bg-yellow-100 text-center">
           Please connect your Spotify account in your Profile to control music.
         </div>
-      ) : null}
+      ) : selectedPlaylist ? (
+        <div className="fixed bottom-0 left-0 right-0 p-4 bg-yellow-100 text-center">
+          Only the playlist owner can control music.
+        </div>
+      )  : null}
 
 
 
