@@ -54,10 +54,33 @@ const SpotifyPlayer = ({ token, songUri, songData, onTrackEnd, isEmpty = false }
         setIsPlaying(!state.paused);
 
         // Detect end / skip
-        if (state.paused && state.position < 1000 && onTrackEnd) {
-          const current = songRef.current;
-          if (current?.id) {
-            onTrackEnd(current.id);
+        // if (state.paused && state.position < 1000 && onTrackEnd) {
+        //   const current = songRef.current;
+        //   if (current?.id) {
+        //     onTrackEnd(current.id);
+        //   }
+        // }
+        const previousTracks = state.track_window.previous_tracks;
+        const currentTrack = state.track_window.current_track;
+        const expectedUri = songRef.current?.spotifyUri; // Get the URI of the song we expect to be playing
+
+        // Check if the player is paused AND the track that just finished playing
+        // (the last one in previous_tracks) matches the one we expected.
+        if (state.paused && previousTracks.length > 0 && expectedUri) {
+          const lastPlayedTrack = previousTracks[previousTracks.length - 1];
+
+          // Condition 1: Track finished naturally (paused near the start of *no* track or the *next* track)
+          // AND the *previous* track's URI matches the one that was supposed to be playing.
+          // Condition 2: The queue ended (currentTrack is null) AND the last played track matches.
+          if (lastPlayedTrack.uri === expectedUri && (state.position < 1000 || !currentTrack)) {
+             // Ensure onTrackEnd is called only once per track end
+             // Check if the current songRef still matches the expectedUri to avoid race conditions
+            if (onTrackEnd && songRef.current?.id && songRef.current?.spotifyUri === expectedUri) {
+              console.log(`Track end detected for ${expectedUri}. Calling onTrackEnd for ID: ${songRef.current.id}`);
+              onTrackEnd(songRef.current.id);
+              // Immediately update the ref to prevent re-triggering for the same ended track
+              // This assumes songRef will update shortly after onTrackEnd causes Dashboard state change
+            }
           }
         }
       });

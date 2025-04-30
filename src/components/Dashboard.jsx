@@ -102,13 +102,15 @@ const Dashboard = ({ user }) => {
   // Initialize or clear currentSong when songs change
   useEffect(() => {
     if (songs.length > 0) {
-      // if no currentSong, or currentSong was just removed, pick the first
       const stillThere = currentSong && songs.some(s => s.id === currentSong.id);
+      // If there's no current song, OR the current song was just removed from the list
       if (!currentSong || !stillThere) {
-        setCurrentSong(songs[0]);
+        console.log("Songs updated, setting currentSong to:", songs[0]?.id || 'null');
+        setCurrentSong(songs[0]); // Set to the new top song
       }
     } else {
       // empty list → clear
+      console.log("Songs updated, list is empty, setting currentSong to null.");
       setCurrentSong(null);
     }
   }, [songs]);
@@ -119,15 +121,16 @@ const Dashboard = ({ user }) => {
       console.log("Cannot remove song: missing playlist or song ID");
       return;
     }
-    
+
     try {
+      console.log(`handleTrackEnd called for songId: ${songId}. Removing from playlist.`);
       await removeSongFromPlaylist(selectedPlaylist.id, songId);
-      // Get fresh songs data after removal
-      const remaining = songs.filter(s => s.id !== songId);
-      console.log("Songs remaining after removal:", remaining.length);
-      setCurrentSong(remaining[0] || null);
+      // Let the Firestore listener update the 'songs' state,
+      // which will trigger the useEffect hook watching 'songs' to set the new currentSong.
+      console.log(`Song ${songId} removed request sent. Waiting for listener update.`);
     } catch (error) {
       console.error("Error handling track end:", error);
+      // Optionally set an error state here if needed
     }
   };
 
